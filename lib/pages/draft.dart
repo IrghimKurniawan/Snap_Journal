@@ -1,63 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snap_journal/navbar/navigationbar.dart';
-import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
-import 'package:snap_journal/pages/draft.dart';
-import 'package:snap_journal/pages/new_journal.dart';
-import 'package:snap_journal/pages/profile.dart';
 
-class JournalPage extends StatefulWidget {
-  const JournalPage({super.key});
+class DraftPage extends StatefulWidget {
+  const DraftPage({super.key});
 
   @override
-  State<JournalPage> createState() => _JournalPageState();
+  State<DraftPage> createState() => _DraftPageState();
 }
 
-class _JournalPageState extends State<JournalPage> {
+class _DraftPageState extends State<DraftPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(80),
-        child: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Color(0xFFF3ECF8),
-          elevation: 0,
-          centerTitle: false,
-          title: Text(
-            "My Journal",
-            style: GoogleFonts.poppins(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF7B5FA7),
-            ),
+      backgroundColor: Color(0xFFF5F0FF),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Color(0xFF9B7EBD)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        title: Text(
+          "Draft",
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF9B7EBD),
           ),
-          actions: [
-            Padding(
-              padding: EdgeInsets.only(right: 16, top: 10),
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => SearchPage()),
-                    );
-                  },
-                  icon: Icon(Icons.search, color: Color(0xFF9B7EBD)),
-                ),
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 16, top: 10),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SearchPage()),
+                  );
+                },
+                icon: Icon(Icons.search, color: Color(0xFF9B7EBD)),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
@@ -66,32 +63,6 @@ class _JournalPageState extends State<JournalPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => DraftPage()),
-                      );
-                    },
-                    child: Container(
-                      height: 30,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        "Draft",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
                   SizedBox(width: 10),
                   Container(
                     height: 30,
@@ -187,6 +158,8 @@ class _JournalPageState extends State<JournalPage> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
+                                SizedBox(width: 8),
+                                _badge(icon: Icons.edit, text: "Edit"),
                               ],
                             ),
                           ],
@@ -199,34 +172,6 @@ class _JournalPageState extends State<JournalPage> {
             ],
           ),
         ),
-      ),
-
-      bottomNavigationBar: CustomBottomNavbar(
-        onHomeTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => DashboardPage()),
-          );
-        },
-        onJournalTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => JournalPage()),
-          );
-        },
-        onMoodsTap: () {},
-        onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProfilePage()),
-          );
-        },
-        onFabTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddJournal()),
-          );
-        },
       ),
     );
   }
