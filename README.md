@@ -16,6 +16,26 @@ Snap Journal is a modern Flutter-based journaling app that allows users to write
 
 ---
 
+## 🚀 Tech Stack
+
+- **Flutter**
+- **Dart**
+- flutter_quill (Rich Text Editor)
+- Google Fonts
+- Custom reusable widgets
+
+---
+
+## 📸 Screens Overview
+
+- Home Page
+- Journal Editor (Rich Text)
+- Notifications
+- Profile Page
+- Media Upload Section
+
+---
+
 ## 🛠 Installation
 
 1. Clone this repository
@@ -49,6 +69,7 @@ lib/
  │    └── custom_textfield.dart
  │
  └── main.dart
+ 
 🎯 Future Improvements
 
 🔐 Authentication system
