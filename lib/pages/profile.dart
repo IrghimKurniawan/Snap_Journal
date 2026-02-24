@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snap_journal/navbar/navigationbar.dart';
+import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
+import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 
@@ -257,40 +258,42 @@ class _ProfilePageState extends State<ProfilePage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {
-                      print("Sign Out Ditekan");
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        vertical: 20,
-                        horizontal: 20,
-                      ),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.door_back_door_outlined,
-                              color: Color(0xFFF5F0FF),
-                              size: 28,
-                            ),
-                            SizedBox(width: 10),
-                            Text(
-                              "Sign Out",
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
+                  SizedBox(height: 30),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        print("Sign Out Ditekan");
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 10,
+                        ),
+                        width: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.door_back_door_outlined,
                                 color: Color(0xFFF5F0FF),
+                                size: 28,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 10),
+                              Text(
+                                "Sign Out",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Color(0xFFF5F0FF),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -327,7 +330,12 @@ class _ProfilePageState extends State<ProfilePage> {
             MaterialPageRoute(builder: (_) => JournalPage()),
           );
         },
-        onMoodsTap: () {},
+        onInsightTap: () {
+           Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => InsightPage()),
+          );
+        },
         onProfileTap: () {
           Navigator.push(
             context,

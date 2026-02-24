@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snap_journal/navbar/navigationbar.dart';
+import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
 import 'package:snap_journal/pages/draft.dart';
+import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 
@@ -214,7 +215,12 @@ class _JournalPageState extends State<JournalPage> {
             MaterialPageRoute(builder: (_) => JournalPage()),
           );
         },
-        onMoodsTap: () {},
+        onInsightTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => InsightPage()),
+          );
+        },
         onProfileTap: () {
           Navigator.push(
             context,

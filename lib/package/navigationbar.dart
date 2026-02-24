@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CustomBottomNavbar extends StatelessWidget {
   final VoidCallback onHomeTap;
   final VoidCallback onJournalTap;
-  final VoidCallback onMoodsTap;
+  final VoidCallback onInsightTap;
   final VoidCallback onProfileTap;
   final VoidCallback onFabTap;
 
@@ -11,27 +11,28 @@ class CustomBottomNavbar extends StatelessWidget {
     super.key,
     required this.onHomeTap,
     required this.onJournalTap,
-    required this.onMoodsTap,
+    required this.onInsightTap,
     required this.onProfileTap,
-    required this.  onFabTap,
+    required this.onFabTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
       height: 90,
+      color: const Color(0xFFF5F0FF), // BACKGROUND FULL (ANTI PUTIH)
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
 
-          /// Background
+          /// NAVBAR BACKGROUND
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: Container(
               height: 70,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFE0E0E0),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25),
@@ -44,16 +45,16 @@ class CustomBottomNavbar extends StatelessWidget {
                   _navItem(Icons.home, "Home", onHomeTap),
                   _navItem(Icons.menu_book, "Journal", onJournalTap),
 
-                  SizedBox(width: 50),
+                  const SizedBox(width: 50),
 
-                  _navItem(Icons.calendar_month, "Moods", onMoodsTap),
+                  _navItem(Icons.calendar_month, "Insight", onInsightTap),
                   _navItem(Icons.person, "Profile", onProfileTap),
                 ],
               ),
             ),
           ),
 
-          /// FAB
+          /// FLOATING FAB
           Positioned(
             top: 0,
             child: GestureDetector(
@@ -62,11 +63,18 @@ class CustomBottomNavbar extends StatelessWidget {
                 width: 65,
                 height: 65,
                 decoration: BoxDecoration(
-                  color: Color(0xFF8E75B8),
+                  color: const Color(0xFF8E75B8),
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 5),
+                  border: Border.all(
+                    color: const Color(0xFFF5F0FF), // SAMA DENGAN BACKGROUND
+                    width: 5,
+                  ),
                 ),
-                child: Icon(Icons.add, color: Colors.white, size: 30),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: 30,
+                ),
               ),
             ),
           ),
@@ -81,10 +89,13 @@ class CustomBottomNavbar extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.grey),
+          Icon(icon, color: Colors.blueGrey),
           Text(
             label,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.blueGrey,
+            ),
           ),
         ],
       ),

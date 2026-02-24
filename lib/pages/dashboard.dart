@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snap_journal/auth/login.dart';
-import 'package:snap_journal/navbar/navigationbar.dart';
+import 'package:snap_journal/package/navigationbar.dart';
+import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/additional pages/notification.dart';
 import 'package:snap_journal/pages/new_journal.dart';
@@ -392,7 +393,12 @@ class _DashboardPageState extends State<DashboardPage> {
             MaterialPageRoute(builder: (_) => JournalPage()),
           );
         },
-        onMoodsTap: () {},
+        onInsightTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => InsightPage()),
+          );
+        },
         onProfileTap: () {
           Navigator.push(
             context,
