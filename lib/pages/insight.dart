@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snap_journal/additional%20pages/share.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/journal.dart';
@@ -37,7 +38,7 @@ class _InsightPageState extends State<InsightPage> {
             child: InkWell(
               borderRadius: BorderRadius.circular(50),
               onTap: () {
-                print("share");
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SharePage()));
               },
               child: Container(
                 width: 45,
