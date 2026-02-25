@@ -6,6 +6,7 @@ import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/account_info.dart';
+import 'package:snap_journal/pages/privacy_policy.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -90,6 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Column(
                       children: [
+                        // ACCOUNT INFO
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -128,27 +130,27 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         SizedBox(height: 20),
 
-                        /// NOTIFICATION
-                        Row(
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                        // NOTIFICATION
+                        GestureDetector(
+                          onTap: () {
+                            print("Notification");
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.notifications_none,
+                                  color: Color(0xFF7B5FA7),
+                                ),
                               ),
-                              child: Icon(
-                                Icons.notifications_none,
-                                color: Color(0xFF7B5FA7),
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () {
-                                print("Notification");
-                              },
-                              child: Text(
+                              SizedBox(width: 16),
+                              Text(
                                 "Notification",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -156,8 +158,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -180,26 +182,27 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                        // THEMES
+                        GestureDetector(
+                          onTap: () {
+                            print("Themes");
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.brush_outlined,
+                                  color: Color(0xFF7B5FA7),
+                                ),
                               ),
-                              child: Icon(
-                                Icons.brush_outlined,
-                                color: Color(0xFF7B5FA7),
-                              ),
-                            ),
-                            SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () {
-                                print("Themes");
-                              },
-                              child: Text(
+                              SizedBox(width: 16),
+                              Text(
                                 "Themes",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -207,8 +210,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -231,26 +234,32 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                        // PRIVACY & POLICY
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PrivacyPolicyPage(),
                               ),
-                              child: Icon(
-                                Icons.lock_outline,
-                                color: Color(0xFF7B5FA7),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.lock_outline,
+                                  color: Color(0xFF7B5FA7),
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () {
-                                print("Privacy & Policy");
-                              },
-                              child: Text(
+                              SizedBox(width: 16),
+                              Text(
                                 "Privacy & Policy",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -258,8 +267,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ],
                     ),
