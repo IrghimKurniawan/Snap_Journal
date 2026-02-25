@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snap_journal/additional%20pages/daily_insight.dart';
 import 'package:snap_journal/auth/login.dart';
-import 'package:snap_journal/navbar/navigationbar.dart';
+import 'package:snap_journal/package/navigationbar.dart';
+import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/additional pages/notification.dart';
 import 'package:snap_journal/pages/new_journal.dart';
@@ -87,9 +89,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => NotificationPage(),
-                          ),
+                          MaterialPageRoute(builder: (_) => NotificationPage()),
                         );
                       },
                       child: Container(
@@ -134,59 +134,33 @@ class _DashboardPageState extends State<DashboardPage> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Icon(
-                          Icons.sentiment_very_satisfied,
-                          color: Color(0xFF7B5FA7),
-                        ),
-                      ),
+                    children: List.generate(4, (index) {
+                      final emojis = ["😍", "😄", "😢", "🙂"];
 
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedIndex = index;
+                          });
+                        },
+                        child: Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: selectedIndex == index
+                                ? Color(0xFF7B5FA7).withOpacity(0.2)
+                                : Colors.grey.shade200,
+                          ),
+                          child: Center(
+                            child: Text(
+                              emojis[index],
+                              style: TextStyle(fontSize: 32),
+                            ),
+                          ),
                         ),
-                        child: Icon(
-                          Icons.sentiment_satisfied,
-                          color: Color(0xFF7B5FA7),
-                        ),
-                      ),
-
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Icon(
-                          Icons.sentiment_dissatisfied,
-                          color: Color(0xFF7B5FA7),
-                        ),
-                      ),
-
-                      Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade300,
-                        ),
-                        child: Icon(
-                          Icons.sentiment_neutral,
-                          color: Color(0xFF7B5FA7),
-                        ),
-                      ),
-                    ],
+                      );
+                    }),
                   ),
                   SizedBox(height: 5),
                   Row(
@@ -324,53 +298,58 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
                   SizedBox(height: 15),
-                  Container(
-                    width: 310,
-                    height: 105,
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Color(0xFF9B7EBD),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 60,
-                          height: 60,
-                          margin: EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.white,
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => DailyInsight()));
+                    },
+                    child: Container(
+                      width: 310,
+                      height: 105,
+                      padding: EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Color(0xFF9B7EBD),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 60,
+                            height: 60,
+                            margin: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: Colors.white,
+                            ),
+                            child: Icon(Icons.help, color: Color(0xFF7B5FA7)),
                           ),
-                          child: Icon(Icons.help, color: Color(0xFF7B5FA7)),
-                        ),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Daily Insight",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Daily Insight",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                "Konsisten Berolahraga Setiap Hari, bukan soal kuat tapi soal komitmen.",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  color: Colors.white70,
+                                SizedBox(height: 4),
+                                Text(
+                                  "Konsisten Berolahraga Setiap Hari, bukan soal kuat tapi soal komitmen.",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -392,7 +371,12 @@ class _DashboardPageState extends State<DashboardPage> {
             MaterialPageRoute(builder: (_) => JournalPage()),
           );
         },
-        onMoodsTap: () {},
+        onInsightTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => InsightPage()),
+          );
+        },
         onProfileTap: () {
           Navigator.push(
             context,
