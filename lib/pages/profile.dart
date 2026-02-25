@@ -5,6 +5,7 @@ import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
+import 'package:snap_journal/pages/account_info.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -89,26 +90,31 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 45,
-                              height: 45,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AccountInfoPage(),
                               ),
-                              child: Icon(
-                                Icons.person_outline,
-                                color: Color(0xFF7B5FA7),
+                            );
+                          },
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 45,
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.person_outline,
+                                  color: Color(0xFF7B5FA7),
+                                ),
                               ),
-                            ),
-                            SizedBox(width: 16),
-                            GestureDetector(
-                              onTap: () {
-                                print("Account Info");
-                              },
-                              child: Text(
+                              SizedBox(width: 16),
+                              Text(
                                 "Account Info",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -116,8 +122,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
 
                         SizedBox(height: 20),
@@ -317,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-       bottomNavigationBar: CustomBottomNavbar(
+      bottomNavigationBar: CustomBottomNavbar(
         onHomeTap: () {
           Navigator.push(
             context,
@@ -331,7 +337,7 @@ class _ProfilePageState extends State<ProfilePage> {
           );
         },
         onInsightTap: () {
-           Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => InsightPage()),
           );
