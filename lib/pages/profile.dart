@@ -7,6 +7,7 @@ import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/account_info.dart';
 import 'package:snap_journal/pages/privacy_policy.dart';
+import 'package:snap_journal/pages/themes.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -185,7 +186,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         // THEMES
                         GestureDetector(
                           onTap: () {
-                            print("Themes");
+                           Navigator.push(context, MaterialPageRoute(builder: (_)=>Themes()));
                           },
                           child: Row(
                             children: [

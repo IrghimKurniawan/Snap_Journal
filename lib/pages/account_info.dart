@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snap_journal/additional%20pages/change_email.dart';
+import 'package:snap_journal/additional%20pages/change_password.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/insight.dart';
@@ -216,11 +218,29 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
-                        suffixText: 'Change Gmail',
-                        suffixStyle: GoogleFonts.poppins(
-                          color: const Color(0xFF9B7EBD),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ChangeEmail(),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Center(
+                              widthFactor: 1,
+                              child: Text(
+                                'Change Gmail',
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF9B7EBD),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -251,11 +271,29 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
-                        suffixText: 'Change Password',
-                        suffixStyle: GoogleFonts.poppins(
-                          color: const Color(0xFF9B7EBD),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                        suffixIcon: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ChangePassword(),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 12),
+                            child: Center(
+                              widthFactor: 1,
+                              child: Text(
+                                'Change Password',
+                                style: GoogleFonts.poppins(
+                                  color: const Color(0xFF9B7EBD),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
