@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/auth/login.dart';
-import 'package:snap_journal/auth/register.dart';
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage({super.key});
-
   @override
   State<VerificationPage> createState() => _VerificationPageState();
 }
@@ -13,6 +13,8 @@ class VerificationPage extends StatefulWidget {
 class _VerificationPageState extends State<VerificationPage> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -43,7 +45,7 @@ class _VerificationPageState extends State<VerificationPage> {
                 ),
                 SizedBox(height: 30),
                 Text(
-                  "Verification",
+                  t['verification']!,
                   style: GoogleFonts.poppins(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -71,7 +73,7 @@ class _VerificationPageState extends State<VerificationPage> {
                         child: Column(
                           children: [
                             Text(
-                              "Verify Your Email",
+                              t['verify_email']!,
                               style: GoogleFonts.poppins(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -79,7 +81,7 @@ class _VerificationPageState extends State<VerificationPage> {
                               ),
                             ),
                             Text(
-                              "We sent a 4-digit code to your email. enter it below open the Journal",
+                              t['verify_body']!,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
@@ -115,33 +117,31 @@ class _VerificationPageState extends State<VerificationPage> {
                                 ),
                               ),
                               onChanged: (value) {
-                                if (value.length == 1) {
+                                if (value.length == 1)
                                   FocusScope.of(context).nextFocus();
-                                }
                               },
                             ),
                           ),
                         ),
                       ),
-
                       SizedBox(height: 15),
-
-                      /// RESEND + CONFIRM
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            "00:10 • Resend code",
+                            t['resend_code']!,
                             style: GoogleFonts.poppins(
                               fontSize: 12,
                               color: Color(0xFFF5F0FF),
                             ),
                           ),
-
                           ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
-                            },
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginPage(),
+                              ),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFF5F0FF),
                               foregroundColor: Color(0xFF9B7EBD),
@@ -149,7 +149,7 @@ class _VerificationPageState extends State<VerificationPage> {
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
-                            child: const Text("Confirm"),
+                            child: Text(t['confirm']!),
                           ),
                         ],
                       ),

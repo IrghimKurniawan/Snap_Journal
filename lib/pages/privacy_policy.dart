@@ -1,11 +1,16 @@
+// privacy_policy.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 
 class PrivacyPolicyPage extends StatelessWidget {
   const PrivacyPolicyPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0FF),
       appBar: AppBar(
@@ -13,19 +18,18 @@ class PrivacyPolicyPage extends StatelessWidget {
         backgroundColor: const Color(0xFFF5F0FF),
         automaticallyImplyLeading: false,
         title: Text(
-          'Privacy & Policy',
+          t['privacy_policy_title']!,
           style: GoogleFonts.poppins(fontSize: 16, color: Colors.black54),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          // ← diganti jadi bisa scroll
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Privacy & Policy',
+                t['privacy_policy_title']!,
                 style: GoogleFonts.poppins(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -33,9 +37,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
               Text(
-                'Privacy Protection',
+                t['privacy_protection']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -51,7 +54,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'Kami menjaga keamanan data kamu dengan serius.\nData jurnal, mood, dan aktivitas kamu disimpan secara aman dan hanya digunakan untuk meningkatkan pengalaman penggunaan aplikasi.\nKami tidak menjual atau membagikan data pribadi kamu ke pihak ketiga tanpa izin.',
+                  t['privacy_protection_body']!,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
@@ -61,9 +64,8 @@ class PrivacyPolicyPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
               Text(
-                'Data Usage & User Rights',
+                t['data_usage']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -79,7 +81,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  'Data digunakan untuk menampilkan insight personal, menyimpan riwayat aktivitas, dan pengembangan fitur aplikasi.\nKamu memiliki hak untuk mengakses, mengubah, atau menghapus data kamu kapan saja melalui aplikasi.',
+                  t['data_usage_body']!,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
                     fontSize: 13,
@@ -89,8 +91,6 @@ class PrivacyPolicyPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // BACK BUTTON
               GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(
@@ -102,7 +102,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      'Back',
+                      t['back']!,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:intl/intl.dart';
 
 class AddJournal extends StatefulWidget {
   const AddJournal({super.key});
-
   @override
   State<AddJournal> createState() => _AddJournalState();
 }
@@ -12,18 +13,18 @@ class AddJournal extends StatefulWidget {
 class _AddJournalState extends State<AddJournal> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Color(0xFFF5F0FF),
         leading: IconButton(
           icon: Icon(Icons.close, color: Color(0xFF9B7EBD)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "New Journal",
+          t['new_journal']!,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -77,7 +78,7 @@ class _AddJournalState extends State<AddJournal> {
                       ),
                       SizedBox(height: 12),
                       Text(
-                        "Title",
+                        t['title']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -93,7 +94,7 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                         child: TextField(
                           decoration: InputDecoration(
-                            hintText: "Title...",
+                            hintText: "${t['title']}...",
                             hintStyle: GoogleFonts.poppins(
                               color: Color(0xFF9B7EBD),
                               fontSize: 14,
@@ -103,15 +104,11 @@ class _AddJournalState extends State<AddJournal> {
                               horizontal: 16,
                             ),
                           ),
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF9B7EBD),
-                          ),
                         ),
                       ),
                       SizedBox(height: 12),
                       Text(
-                        "Note",
+                        t['note']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -119,27 +116,23 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       SizedBox(height: 8),
-                      Column(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Color(0xFFF5F0FF),
-                              borderRadius: BorderRadius.circular(10),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xFFF5F0FF),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: TextField(
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            hintText: "${t['note']}...",
+                            hintStyle: GoogleFonts.poppins(
+                              color: Color(0xFF9B7EBD),
+                              fontSize: 14,
                             ),
-                            child: TextField(
-                              maxLines: 4,
-                              decoration: InputDecoration(
-                                hintText: "Note...",
-                                hintStyle: GoogleFonts.poppins(
-                                  color: Color(0xFF9B7EBD),
-                                  fontSize: 14,
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(16),
-                              ),
-                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(16),
                           ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -156,7 +149,7 @@ class _AddJournalState extends State<AddJournal> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Add Media",
+                        t['add_media']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -166,12 +159,9 @@ class _AddJournalState extends State<AddJournal> {
                       SizedBox(height: 8),
                       Row(
                         children: [
-                          /// PHOTO
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                print("Photo ditekan");
-                              },
+                              onTap: () {},
                               child: Container(
                                 height: 90,
                                 decoration: BoxDecoration(
@@ -192,7 +182,7 @@ class _AddJournalState extends State<AddJournal> {
                                     ),
                                     SizedBox(height: 8),
                                     Text(
-                                      "Photo",
+                                      t['photo']!,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w500,
@@ -203,15 +193,10 @@ class _AddJournalState extends State<AddJournal> {
                               ),
                             ),
                           ),
-
                           SizedBox(width: 16),
-
-                          /// VIDEO
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                print("Video ditekan");
-                              },
+                              onTap: () {},
                               child: Container(
                                 height: 90,
                                 decoration: BoxDecoration(
@@ -232,7 +217,7 @@ class _AddJournalState extends State<AddJournal> {
                                     ),
                                     SizedBox(height: 8),
                                     Text(
-                                      "Video",
+                                      t['video']!,
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w500,
@@ -247,7 +232,7 @@ class _AddJournalState extends State<AddJournal> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Preview",
+                        t['preview']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
@@ -268,9 +253,7 @@ class _AddJournalState extends State<AddJournal> {
                 ),
                 SizedBox(height: 15),
                 GestureDetector(
-                  onTap: () {
-                    print("Save ditekan");
-                  },
+                  onTap: () {},
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                     width: double.infinity,
@@ -285,7 +268,7 @@ class _AddJournalState extends State<AddJournal> {
                           Icon(Icons.save, color: Color(0xFFF5F0FF), size: 28),
                           SizedBox(width: 10),
                           Text(
-                            "Save",
+                            t['save']!,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -299,28 +282,27 @@ class _AddJournalState extends State<AddJournal> {
                 ),
                 SizedBox(height: 5),
                 GestureDetector(
-                  onTap: () {
-                    print("Draft ditekan");
-                  },
+                  onTap: () {},
                   child: Container(
                     padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: Color(0xFF9B7EBD),
-                        width: 1.5,
-                      ),
+                      border: Border.all(color: Color(0xFF9B7EBD), width: 1.5),
                     ),
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.drafts, color: Color(0xFF9B7EBD), size: 28),
+                          Icon(
+                            Icons.drafts,
+                            color: Color(0xFF9B7EBD),
+                            size: 28,
+                          ),
                           SizedBox(width: 10),
                           Text(
-                            "Save as Draft",
+                            t['save_as_draft']!,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,

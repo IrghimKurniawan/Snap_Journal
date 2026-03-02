@@ -1,22 +1,20 @@
+// change_email.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 
 class ChangeEmail extends StatefulWidget {
   const ChangeEmail({super.key});
-
   @override
   State<ChangeEmail> createState() => _ChangeEmailState();
 }
 
 class _ChangeEmailState extends State<ChangeEmail> {
-  final TextEditingController currentEmailController = TextEditingController(
-    text: "user@gmail.com",
-  );
-
-  final TextEditingController newEmailController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-
+  final currentEmailController = TextEditingController(text: "user@gmail.com");
+  final newEmailController = TextEditingController();
+  final otpController = TextEditingController();
+  final passwordController = TextEditingController();
   bool obscurePassword = true;
 
   final Color primaryColor = const Color(0xFF9B7EBD);
@@ -24,6 +22,8 @@ class _ChangeEmailState extends State<ChangeEmail> {
 
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -31,7 +31,7 @@ class _ChangeEmailState extends State<ChangeEmail> {
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          'Change Email',
+          t['change_email_title']!,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.w600,
@@ -44,54 +44,19 @@ class _ChangeEmailState extends State<ChangeEmail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// CURRENT EMAIL
-            _buildLabel("Current Email"),
+            _buildLabel(t['current_email']!),
             const SizedBox(height: 6),
-            TextField(
-              controller: currentEmailController,
-              readOnly: true,
-              style: GoogleFonts.poppins(),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-
+            _buildField(controller: currentEmailController, readOnly: true),
             const SizedBox(height: 20),
-
-            /// NEW EMAIL
-            _buildLabel("New Email"),
+            _buildLabel(t['new_email']!),
             const SizedBox(height: 6),
-            TextField(
+            _buildField(
               controller: newEmailController,
+              hint: t['new_email_hint']!,
               keyboardType: TextInputType.emailAddress,
-              style: GoogleFonts.poppins(),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "Enter new email",
-                hintStyle: GoogleFonts.poppins(fontSize: 13),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
             ),
-
             const SizedBox(height: 20),
-            _buildLabel("OTP"),
+            _buildLabel(t['otp']!),
             const SizedBox(height: 6),
             TextField(
               controller: otpController,
@@ -101,10 +66,10 @@ class _ChangeEmailState extends State<ChangeEmail> {
               style: GoogleFonts.poppins(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                letterSpacing: 6, // biar renggang kayak OTP
+                letterSpacing: 6,
               ),
               decoration: InputDecoration(
-                counterText: "", // hilangin 0/6
+                counterText: "",
                 filled: true,
                 fillColor: Colors.white,
                 hintText: "------",
@@ -112,18 +77,16 @@ class _ChangeEmailState extends State<ChangeEmail> {
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF9B7EBD), width: 1.5),
+                  borderSide: BorderSide(color: primaryColor, width: 1.5),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Color(0xFF9B7EBD), width: 2.5),
+                  borderSide: BorderSide(color: primaryColor, width: 2.5),
                 ),
               ),
             ),
             const SizedBox(height: 20),
-
-            /// PASSWORD CONFIRMATION
-            _buildLabel("Confirm Password"),
+            _buildLabel(t['confirm_password']!),
             const SizedBox(height: 6),
             TextField(
               controller: passwordController,
@@ -145,18 +108,12 @@ class _ChangeEmailState extends State<ChangeEmail> {
                     obscurePassword ? Icons.visibility_off : Icons.visibility,
                     color: primaryColor,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      obscurePassword = !obscurePassword;
-                    });
-                  },
+                  onPressed: () =>
+                      setState(() => obscurePassword = !obscurePassword),
                 ),
               ),
             ),
-
             const Spacer(),
-
-            /// SAVE BUTTON
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -167,11 +124,9 @@ class _ChangeEmailState extends State<ChangeEmail> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  print("Save Email Clicked");
-                },
+                onPressed: () {},
                 child: Text(
-                  "Save Changes",
+                  t['save_changes']!,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
@@ -186,13 +141,34 @@ class _ChangeEmailState extends State<ChangeEmail> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: GoogleFonts.poppins(
-        fontWeight: FontWeight.w600,
-        color: primaryColor,
+  Widget _buildLabel(String text) => Text(
+    text,
+    style: GoogleFonts.poppins(
+      fontWeight: FontWeight.w600,
+      color: primaryColor,
+    ),
+  );
+
+  Widget _buildField({
+    required TextEditingController controller,
+    bool readOnly = false,
+    String? hint,
+    TextInputType? keyboardType,
+  }) => TextField(
+    controller: controller,
+    readOnly: readOnly,
+    keyboardType: keyboardType,
+    style: GoogleFonts.poppins(),
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      hintText: hint,
+      hintStyle: GoogleFonts.poppins(fontSize: 13),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
       ),
-    );
-  }
+    ),
+  );
 }

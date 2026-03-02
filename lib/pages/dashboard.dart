@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/daily_insight.dart';
-import 'package:snap_journal/auth/login.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
-import 'package:snap_journal/additional pages/notification.dart';
+import 'package:snap_journal/additional%20pages/notification.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 
@@ -18,8 +19,11 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int selectedIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       extendBody: true,
       appBar: PreferredSize(
@@ -34,10 +38,8 @@ class _DashboardPageState extends State<DashboardPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  /// LEFT SIDE (AVATAR + TEXT)
                   Row(
                     children: [
-                      /// AVATAR
                       Container(
                         width: 60,
                         height: 60,
@@ -53,16 +55,13 @@ class _DashboardPageState extends State<DashboardPage> {
                           ],
                         ),
                       ),
-
                       const SizedBox(width: 15),
-
-                      /// TEXT
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Good Morning",
+                            t['good_morning']!,
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               color: Colors.grey,
@@ -80,18 +79,14 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-
-                  /// NOTIFICATION ICON
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(50),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => NotificationPage()),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => NotificationPage()),
+                      ),
                       child: Container(
                         width: 45,
                         height: 45,
@@ -120,8 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "How Are You Feeling ?",
-                  textAlign: TextAlign.start,
+                  t['how_feeling']!,
                   style: GoogleFonts.poppins(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -136,13 +130,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: List.generate(4, (index) {
                       final emojis = ["😍", "😄", "😢", "🙂"];
-
                       return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedIndex = index;
-                          });
-                        },
+                        onTap: () => setState(() => selectedIndex = index),
                         child: Container(
                           width: 60,
                           height: 60,
@@ -167,23 +156,19 @@ class _DashboardPageState extends State<DashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Text(
-                        "happy",
-                        textAlign: TextAlign.start,
+                        t['mood_happy']!,
                         style: GoogleFonts.poppins(color: Color(0xFF7B5FA7)),
                       ),
                       Text(
-                        "Calm",
-                        textAlign: TextAlign.start,
+                        t['mood_calm']!,
                         style: GoogleFonts.poppins(color: Color(0xFF7B5FA7)),
                       ),
                       Text(
-                        "Sad",
-                        textAlign: TextAlign.start,
+                        t['mood_sad']!,
                         style: GoogleFonts.poppins(color: Color(0xFF7B5FA7)),
                       ),
                       Text(
-                        "Netral",
-                        textAlign: TextAlign.start,
+                        t['mood_neutral']!,
                         style: GoogleFonts.poppins(color: Color(0xFF7B5FA7)),
                       ),
                     ],
@@ -193,8 +178,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "Latest Memory",
-                        textAlign: TextAlign.start,
+                        t['latest_memory']!,
                         style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -233,14 +217,11 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.photo,
-                                  size: 16,
-                                  color: Colors.white,
-                                ),
+                                Icon(Icons.photo,
+                                    size: 16, color: Colors.white),
                                 SizedBox(width: 5),
                                 Text(
-                                  "Photo",
+                                  t['photo']!,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -275,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  "Olahraga",
+                                  t['sample_title']!,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -284,7 +265,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  "Berolahraga di senin Pagi.",
+                                  t['sample_body']!,
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 12,
@@ -299,9 +280,10 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                   SizedBox(height: 15),
                   GestureDetector(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => DailyInsight()));
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DailyInsight()),
+                    ),
                     child: Container(
                       width: 310,
                       height: 105,
@@ -328,7 +310,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Daily Insight",
+                                  t['daily_insight']!,
                                   style: GoogleFonts.poppins(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -337,7 +319,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                                 SizedBox(height: 4),
                                 Text(
-                                  "Konsisten Berolahraga Setiap Hari, bukan soal kuat tapi soal komitmen.",
+                                  t['daily_insight_body']!,
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     color: Colors.white70,
@@ -359,36 +341,26 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavbar(
-        onHomeTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => DashboardPage()),
-          );
-        },
-        onJournalTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => JournalPage()),
-          );
-        },
-        onInsightTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => InsightPage()),
-          );
-        },
-        onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProfilePage()),
-          );
-        },
-        onFabTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddJournal()),
-          );
-        },
+        onHomeTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DashboardPage()),
+        ),
+        onJournalTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalPage()),
+        ),
+        onInsightTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => InsightPage()),
+        ),
+        onProfileTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ProfilePage()),
+        ),
+        onFabTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddJournal()),
+        ),
       ),
     );
   }

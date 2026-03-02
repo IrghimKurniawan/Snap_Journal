@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/share.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
@@ -10,7 +12,6 @@ import 'package:snap_journal/package/caldendar_realtime.dart';
 
 class InsightPage extends StatefulWidget {
   const InsightPage({super.key});
-
   @override
   State<InsightPage> createState() => _InsightPageState();
 }
@@ -18,6 +19,8 @@ class InsightPage extends StatefulWidget {
 class _InsightPageState extends State<InsightPage> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -25,7 +28,7 @@ class _InsightPageState extends State<InsightPage> {
         elevation: 0,
         centerTitle: false,
         title: Text(
-          "Journal Insight",
+          t['journal_insight']!,
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -37,9 +40,10 @@ class _InsightPageState extends State<InsightPage> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(50),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SharePage()));
-              },
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SharePage()),
+              ),
               child: Container(
                 width: 45,
                 height: 45,
@@ -64,7 +68,7 @@ class _InsightPageState extends State<InsightPage> {
                 RealTimeCalendar(),
                 SizedBox(height: 15),
                 Text(
-                  "Monthly Summary",
+                  t['monthly_summary']!,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -77,7 +81,6 @@ class _InsightPageState extends State<InsightPage> {
                   width: double.infinity,
                   child: Row(
                     children: [
-                      /// CARD 1
                       Expanded(
                         child: Container(
                           padding: EdgeInsets.all(20),
@@ -88,7 +91,7 @@ class _InsightPageState extends State<InsightPage> {
                           child: Column(
                             children: [
                               Text(
-                                "Top Mood",
+                                t['top_mood']!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -97,7 +100,7 @@ class _InsightPageState extends State<InsightPage> {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                "Happy",
+                                t['mood_happy']!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
@@ -108,10 +111,7 @@ class _InsightPageState extends State<InsightPage> {
                           ),
                         ),
                       ),
-
                       SizedBox(width: 12),
-
-                      /// CARD 2
                       Expanded(
                         child: Container(
                           padding: EdgeInsets.all(20),
@@ -122,7 +122,7 @@ class _InsightPageState extends State<InsightPage> {
                           child: Column(
                             children: [
                               Text(
-                                "Journal Entries",
+                                t['journal_entries']!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -172,7 +172,7 @@ class _InsightPageState extends State<InsightPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Daily Insight",
+                              t['daily_insight']!,
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -181,7 +181,7 @@ class _InsightPageState extends State<InsightPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              "Konsisten Berolahraga Setiap Hari, bukan soal kuat tapi soal komitmen.",
+                              t['daily_insight_body']!,
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Colors.white70,
@@ -201,52 +201,25 @@ class _InsightPageState extends State<InsightPage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavbar(
-        onHomeTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => DashboardPage()),
-          );
-        },
-        onJournalTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => JournalPage()),
-          );
-        },
-        onInsightTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => InsightPage()),
-          );
-        },
-        onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProfilePage()),
-          );
-        },
-        onFabTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddJournal()),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _DayLabel extends StatelessWidget {
-  final String text;
-  const _DayLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(color: Colors.white70, fontSize: 12),
+        onHomeTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DashboardPage()),
+        ),
+        onJournalTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalPage()),
+        ),
+        onInsightTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => InsightPage()),
+        ),
+        onProfileTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ProfilePage()),
+        ),
+        onFabTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddJournal()),
         ),
       ),
     );

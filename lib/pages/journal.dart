@@ -1,5 +1,8 @@
+// journal.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
@@ -10,7 +13,6 @@ import 'package:snap_journal/pages/profile.dart';
 
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
-
   @override
   State<JournalPage> createState() => _JournalPageState();
 }
@@ -18,6 +20,8 @@ class JournalPage extends StatefulWidget {
 class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(80),
@@ -27,7 +31,7 @@ class _JournalPageState extends State<JournalPage> {
           elevation: 0,
           centerTitle: false,
           title: Text(
-            "My Journal",
+            t['my_journal']!,
             style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -45,12 +49,10 @@ class _JournalPageState extends State<JournalPage> {
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => SearchPage()),
-                    );
-                  },
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SearchPage()),
+                  ),
                   icon: Icon(Icons.search, color: Color(0xFF9B7EBD)),
                 ),
               ),
@@ -58,7 +60,6 @@ class _JournalPageState extends State<JournalPage> {
           ],
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
@@ -68,12 +69,10 @@ class _JournalPageState extends State<JournalPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => DraftPage()),
-                      );
-                    },
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DraftPage()),
+                    ),
                     child: Container(
                       height: 30,
                       padding: EdgeInsets.symmetric(
@@ -85,7 +84,7 @@ class _JournalPageState extends State<JournalPage> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        "Draft",
+                        t['draft']!,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Colors.white,
@@ -102,7 +101,7 @@ class _JournalPageState extends State<JournalPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Favorites",
+                      t['favorites']!,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white,
@@ -121,28 +120,26 @@ class _JournalPageState extends State<JournalPage> {
                 ),
                 child: Stack(
                   children: [
-                    /// Background Image / Placeholder
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.grey.shade300,
                       ),
                     ),
-
-                    /// TOP RIGHT BADGES
                     Positioned(
                       top: 10,
                       right: 10,
                       child: Row(
                         children: [
-                          _badge(icon: Icons.favorite_outline, text: "Favorite"),
+                          _badge(
+                            icon: Icons.favorite_outline,
+                            text: t['favorites']!,
+                          ),
                           SizedBox(width: 8),
-                          _badge(icon: Icons.photo, text: "Photo"),
+                          _badge(icon: Icons.photo, text: t['photo']!),
                         ],
                       ),
                     ),
-
-                    /// BOTTOM INFO SECTION
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
@@ -176,19 +173,12 @@ class _JournalPageState extends State<JournalPage> {
                               ),
                             ),
                             SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "Berolahraga di senin pagi.",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              "Berolahraga di senin pagi.",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
@@ -201,46 +191,33 @@ class _JournalPageState extends State<JournalPage> {
           ),
         ),
       ),
-
       bottomNavigationBar: CustomBottomNavbar(
-        onHomeTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => DashboardPage()),
-          );
-        },
-        onJournalTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => JournalPage()),
-          );
-        },
-        onInsightTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => InsightPage()),
-          );
-        },
-        onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProfilePage()),
-          );
-        },
-        onFabTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddJournal()),
-          );
-        },
+        onHomeTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DashboardPage()),
+        ),
+        onJournalTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalPage()),
+        ),
+        onInsightTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => InsightPage()),
+        ),
+        onProfileTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ProfilePage()),
+        ),
+        onFabTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddJournal()),
+        ),
       ),
     );
   }
 }
-Widget _badge({
-  required IconData icon,
-  required String text,
-}) {
+
+Widget _badge({required IconData icon, required String text}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
@@ -251,13 +228,7 @@ Widget _badge({
       children: [
         Icon(icon, size: 14, color: Colors.white),
         SizedBox(width: 5),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: TextStyle(color: Colors.white, fontSize: 12)),
       ],
     ),
   );

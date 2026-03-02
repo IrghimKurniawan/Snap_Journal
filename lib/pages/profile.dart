@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/insight.dart';
@@ -9,16 +11,14 @@ import 'package:snap_journal/pages/account_info.dart';
 import 'package:snap_journal/pages/privacy_policy.dart';
 import 'package:snap_journal/pages/themes.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
-
-class _ProfilePageState extends State<ProfilePage> {
-  @override
   Widget build(BuildContext context) {
+    final lang = Provider.of<LanguageProvider>(context);
+    final t = lang.text;
+
     return Scaffold(
       backgroundColor: Color(0xFFF5F0FF),
       appBar: AppBar(
@@ -26,7 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: Color(0xFFF5F0FF),
         automaticallyImplyLeading: false,
         title: Text(
-          "Profile",
+          t['profile']!,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -51,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       BoxShadow(
                         color: Colors.white,
                         blurRadius: 5,
-                        offset: const Offset(0, 3),
+                        offset: Offset(0, 3),
                       ),
                     ],
                   ),
@@ -75,105 +75,50 @@ class _ProfilePageState extends State<ProfilePage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "General",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF9B7EBD),
-                    ),
-                  ),
+                  // GENERAL
+                  _sectionTitle(t['general']!),
                   SizedBox(height: 10),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF9B7EBD),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Column(
-                      children: [
-                        // ACCOUNT INFO
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AccountInfoPage(),
-                              ),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.person_outline,
-                                  color: Color(0xFF7B5FA7),
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Text(
-                                "Account Info",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
+                  _menuBox(
+                    children: [
+                      _menuItem(
+                        icon: Icons.person_outline,
+                        label: t['account_info']!,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => AccountInfoPage()),
                         ),
+                      ),
+                      SizedBox(height: 20),
+                      _menuItem(
+                        icon: Icons.notifications_none,
+                        label: t['notification']!,
+                        onTap: () => print("Notification"),
+                      ),
+                    ],
+                  ),
 
-                        SizedBox(height: 20),
+                  SizedBox(height: 10),
 
-                        // NOTIFICATION
-                        GestureDetector(
-                          onTap: () {
-                            print("Notification");
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.notifications_none,
-                                  color: Color(0xFF7B5FA7),
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Text(
-                                "Notification",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // APPEARANCE
+                  _sectionTitle(t['appearance']!),
                   SizedBox(height: 10),
-                  Text(
-                    "Appearance & Experience",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF9B7EBD),
-                    ),
+                  _menuBox(
+                    children: [
+                      _menuItem(
+                        icon: Icons.brush_outlined,
+                        label: t['themes']!,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => Themes()),
+                        ),
+                      ),
+                    ],
                   ),
+
+                  SizedBox(height: 10),
+
+                  // LANGUAGE SETTINGS
+                  _sectionTitle(t['language_settings']!),
                   SizedBox(height: 10),
                   Container(
                     padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -181,105 +126,87 @@ class _ProfilePageState extends State<ProfilePage> {
                       color: Color(0xFF9B7EBD),
                       borderRadius: BorderRadius.circular(25),
                     ),
-                    child: Column(
+                    child: Row(
                       children: [
-                        // THEMES
-                        GestureDetector(
-                          onTap: () {
-                           Navigator.push(context, MaterialPageRoute(builder: (_)=>Themes()));
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.brush_outlined,
-                                  color: Color(0xFF7B5FA7),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => lang.setLanguage('English'),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: lang.language == 'English'
+                                    ? Color(0xFF5C3D8F)
+                                    : Color(0xFFB89FD8),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '🇺🇸  English',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: lang.language == 'English'
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                  ),
                                 ),
                               ),
-                              SizedBox(width: 16),
-                              Text(
-                                "Themes",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => lang.setLanguage('Indonesia'),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: lang.language == 'Indonesia'
+                                    ? Color(0xFF5C3D8F)
+                                    : Color(0xFFB89FD8),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '🇮🇩  Indonesia',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontWeight: lang.language == 'Indonesia'
+                                        ? FontWeight.w700
+                                        : FontWeight.w400,
+                                  ),
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
+
                   SizedBox(height: 10),
-                  Text(
-                    "Data & Privacy",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF9B7EBD),
-                    ),
-                  ),
+
+                  // DATA & PRIVACY
+                  _sectionTitle(t['data_privacy']!),
                   SizedBox(height: 10),
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF9B7EBD),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Column(
-                      children: [
-                        // PRIVACY & POLICY
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PrivacyPolicyPage(),
-                              ),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 45,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.lock_outline,
-                                  color: Color(0xFF7B5FA7),
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              Text(
-                                "Privacy & Policy",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                  _menuBox(
+                    children: [
+                      _menuItem(
+                        icon: Icons.lock_outline,
+                        label: t['privacy_policy']!,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PrivacyPolicyPage(),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+
                   SizedBox(height: 30),
                   Center(
                     child: GestureDetector(
-                      onTap: () {
-                        print("Sign Out Ditekan");
-                      },
+                      onTap: () => print("Sign Out"),
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           vertical: 10,
@@ -301,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                "Sign Out",
+                                t['sign_out']!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
@@ -317,8 +244,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   SizedBox(height: 20),
                   Center(
                     child: Text(
-                      "Version 0.0.0",
-                      textAlign: TextAlign.center,
+                      t['version']!,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -334,37 +260,75 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       bottomNavigationBar: CustomBottomNavbar(
-        onHomeTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => DashboardPage()),
-          );
-        },
-        onJournalTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => JournalPage()),
-          );
-        },
-        onInsightTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => InsightPage()),
-          );
-        },
-        onProfileTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ProfilePage()),
-          );
-        },
-        onFabTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddJournal()),
-          );
-        },
+        onHomeTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => DashboardPage()),
+        ),
+        onJournalTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => JournalPage()),
+        ),
+        onInsightTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => InsightPage()),
+        ),
+        onProfileTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ProfilePage()),
+        ),
+        onFabTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddJournal()),
+        ),
       ),
     );
   }
+
+  Widget _sectionTitle(String title) => Text(
+    title,
+    style: GoogleFonts.poppins(
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+      color: Color(0xFF9B7EBD),
+    ),
+  );
+
+  Widget _menuBox({required List<Widget> children}) => Container(
+    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+    decoration: BoxDecoration(
+      color: Color(0xFF9B7EBD),
+      borderRadius: BorderRadius.circular(25),
+    ),
+    child: Column(children: children),
+  );
+
+  Widget _menuItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) => GestureDetector(
+    onTap: onTap,
+    child: Row(
+      children: [
+        Container(
+          width: 45,
+          height: 45,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Color(0xFF7B5FA7)),
+        ),
+        SizedBox(width: 16),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
 }

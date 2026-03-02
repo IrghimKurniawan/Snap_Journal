@@ -1,9 +1,11 @@
+// daily_insight.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 
 class DailyInsight extends StatefulWidget {
   const DailyInsight({super.key});
-
   @override
   State<DailyInsight> createState() => _DailyInsightState();
 }
@@ -11,19 +13,18 @@ class DailyInsight extends StatefulWidget {
 class _DailyInsightState extends State<DailyInsight> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.close, color: Color(0xFFF5F0FF), size: 30),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Color(0xFF9B7EBD),
         elevation: 0,
-        centerTitle: false,
         title: Text(
-          "Daily Insight",
+          t['daily_insight_title']!,
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -57,13 +58,17 @@ class _DailyInsightState extends State<DailyInsight> {
                           color: Color(0xFF9B7EBD),
                         ),
                         child: Center(
-                          child: Icon(Icons.help_outline, color: Colors.white, size: 40),
+                          child: Icon(
+                            Icons.help_outline,
+                            color: Colors.white,
+                            size: 40,
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: 10),
                     Text(
-                      "Kamu sedang berada di fase yang cukup positif.",
+                      t['insight_positive']!,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
@@ -71,9 +76,9 @@ class _DailyInsightState extends State<DailyInsight> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(height: 20),
                     Text(
-                      "Konsistensi Dalam kesehatan",
+                      t['insight_consistency']!,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 14,
@@ -84,7 +89,7 @@ class _DailyInsightState extends State<DailyInsight> {
                 ),
               ),
               Text(
-                "Analysis",
+                t['analysis']!,
                 style: GoogleFonts.poppins(
                   fontSize: 20,
                   color: Color(0xFFF5F0FF),
@@ -99,7 +104,7 @@ class _DailyInsightState extends State<DailyInsight> {
                   color: Color(0xFFF5F0FF),
                 ),
                 child: Text(
-                  "Dalam beberapa hari terakhir\n Mood kamu cenderung stabil dan\n dominan positif",
+                  t['insight_analysis']!,
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     color: Color(0xFF9B7EBD),

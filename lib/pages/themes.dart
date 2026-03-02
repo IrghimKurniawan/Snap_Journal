@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class Themes extends StatefulWidget {
   const Themes({super.key});
-
   @override
   State<Themes> createState() => _ThemesState();
 }
@@ -12,11 +13,13 @@ class Themes extends StatefulWidget {
 class _ThemesState extends State<Themes> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       backgroundColor: Color(0xFFF5F0FF),
       appBar: AppBar(
         title: Text(
-          'Themes',
+          t['themes_title']!,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -35,7 +38,7 @@ class _ThemesState extends State<Themes> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Appearance',
+                t['appearance_label']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Color(0xFF9B7EBD),
@@ -62,7 +65,7 @@ class _ThemesState extends State<Themes> {
                     ),
                     SizedBox(width: 10),
                     Text(
-                      'Dark Mode',
+                      t['dark_mode']!,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -84,16 +87,14 @@ class _ThemesState extends State<Themes> {
                       totalSwitches: 2,
                       labels: ['', ''],
                       radiusStyle: true,
-                      onToggle: (index) {
-                        print('switched to: $index');
-                      },
+                      onToggle: (index) {},
                     ),
                   ],
                 ),
               ),
               SizedBox(height: 10),
               Text(
-                'Color Themes',
+                t['color_themes']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
                   color: Color(0xFF9B7EBD),
@@ -112,175 +113,73 @@ class _ThemesState extends State<Themes> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF9B7EBD),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                        ),
+                        _colorCircle(Color(0xFF9B7EBD), border: true),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF121212),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFF121212)),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFE5E5E5),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFFE5E5E5)),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFCFCFCF),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFFCFCFCF)),
                       ],
                     ),
                     SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Default",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Midnight",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Light Gray",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Soft Silver",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                      ],
+                      children:
+                          ['Default', 'Midnight', 'Light Gray', 'Soft Silver']
+                              .map(
+                                (s) => Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                  child: Text(
+                                    s,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF34C759),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFF34C759)),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF008080),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFF008080)),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFFFC0CB),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFFFFC0CB)),
                         SizedBox(width: 10),
-                        Container(
-                          width: 45,
-                          height: 45,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF4B0082),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
+                        _colorCircle(Color(0xFF4B0082)),
                       ],
                     ),
                     SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Green",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Teal",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Pink",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Indigo",
-                          style: GoogleFonts.poppins(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                      ],
+                      children: ['Green', 'Teal', 'Pink', 'Indigo']
+                          .map(
+                            (s) => Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                s,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                     ),
                     SizedBox(height: 20),
                     Divider(color: Colors.white, thickness: 1.5),
                     SizedBox(height: 10),
                     Center(
                       child: Text(
-                        "Accent Color",
+                        t['accent_color']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -291,122 +190,46 @@ class _ThemesState extends State<Themes> {
                     SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.white),
-                            color: Color(0xFF7B5FA7),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEC221F),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF000000),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(0xFFFFFFFF),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF0000FF),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ],
+                      children:
+                          [
+                                Color(0xFF7B5FA7),
+                                Color(0xFFEC221F),
+                                Color(0xFF000000),
+                                Color(0xFFFFFFFF),
+                                Color(0xFF0000FF),
+                                Colors.white,
+                              ]
+                              .map(
+                                (c) => Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 5),
+                                  child: _colorCircle(
+                                    c,
+                                    small: true,
+                                    border: c == Color(0xFF7B5FA7),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                     SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Default",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Red",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Black",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "White",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Blue",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          "Custom",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                      ],
+                      children:
+                          ['Default', 'Red', 'Black', 'White', 'Blue', 'Custom']
+                              .map(
+                                (s) => Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 3),
+                                  child: Text(
+                                    s,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                   ],
                 ),
@@ -422,7 +245,7 @@ class _ThemesState extends State<Themes> {
                   ),
                   child: Center(
                     child: Text(
-                      "Save Changes",
+                      t['save_changes']!,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -435,6 +258,19 @@ class _ThemesState extends State<Themes> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _colorCircle(Color color, {bool border = false, bool small = false}) {
+    double size = small ? 20 : 45;
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: border ? Border.all(color: Colors.white, width: 2) : null,
       ),
     );
   }

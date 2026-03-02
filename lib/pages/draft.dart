@@ -1,10 +1,12 @@
+// draft.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
 
 class DraftPage extends StatefulWidget {
   const DraftPage({super.key});
-
   @override
   State<DraftPage> createState() => _DraftPageState();
 }
@@ -12,20 +14,20 @@ class DraftPage extends StatefulWidget {
 class _DraftPageState extends State<DraftPage> {
   @override
   Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
+
     return Scaffold(
       backgroundColor: Color(0xFFF5F0FF),
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.close, color: Color(0xFF9B7EBD)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
         title: Text(
-          "Draft",
+          t['draft_title']!,
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -43,12 +45,10 @@ class _DraftPageState extends State<DraftPage> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => SearchPage()),
-                  );
-                },
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SearchPage()),
+                ),
                 icon: Icon(Icons.search, color: Color(0xFF9B7EBD)),
               ),
             ),
@@ -72,7 +72,7 @@ class _DraftPageState extends State<DraftPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Favorites",
+                      t['favorites']!,
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white,
@@ -91,28 +91,26 @@ class _DraftPageState extends State<DraftPage> {
                 ),
                 child: Stack(
                   children: [
-                    /// Background Image / Placeholder
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.grey.shade300,
                       ),
                     ),
-
-                    /// TOP RIGHT BADGES
                     Positioned(
                       top: 10,
                       right: 10,
                       child: Row(
                         children: [
-                          _badge(icon: Icons.favorite_outline, text: "Favorite"),
+                          _badgeDraft(
+                            icon: Icons.favorite_outline,
+                            text: t['favorites']!,
+                          ),
                           SizedBox(width: 8),
-                          _badge(icon: Icons.photo, text: "Photo"),
+                          _badgeDraft(icon: Icons.photo, text: t['photo']!),
                         ],
                       ),
                     ),
-
-                    /// BOTTOM INFO SECTION
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
@@ -159,7 +157,7 @@ class _DraftPageState extends State<DraftPage> {
                                   ),
                                 ),
                                 SizedBox(width: 8),
-                                _badge(icon: Icons.edit, text: "Edit"),
+                                _badgeDraft(icon: Icons.edit, text: "Edit"),
                               ],
                             ),
                           ],
@@ -176,10 +174,8 @@ class _DraftPageState extends State<DraftPage> {
     );
   }
 }
-Widget _badge({
-  required IconData icon,
-  required String text,
-}) {
+
+Widget _badgeDraft({required IconData icon, required String text}) {
   return Container(
     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
@@ -190,13 +186,7 @@ Widget _badge({
       children: [
         Icon(icon, size: 14, color: Colors.white),
         SizedBox(width: 5),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: TextStyle(color: Colors.white, fontSize: 12)),
       ],
     ),
   );
