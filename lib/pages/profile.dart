@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/auth/login.dart';
+import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
@@ -10,10 +12,13 @@ import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/account_info.dart';
 import 'package:snap_journal/pages/privacy_policy.dart';
 import 'package:snap_journal/pages/themes.dart';
+import 'package:snap_journal/models/profileuser_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snap_journal/services/profile_services.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
+  ProfilePage({super.key});
+  final Future<UserProfileModel?> _profileFuture = ProfileServices.getProfile();
   @override
   Widget build(BuildContext context) {
     final lang = Provider.of<LanguageProvider>(context);
@@ -39,37 +44,77 @@ class ProfilePage extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey.shade300,
-                    border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
+              FutureBuilder<UserProfileModel?>(
+                future: ProfileServices.getProfile(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data == null) {
+                    return const Text("Gagal memuat profile");
+                  }
+
+                  final user = snapshot.data!;
+
+                  return Column(
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey.shade300,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                            image: user.photoUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(user.photoUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: user.photoUrl == null
+                              ? const Icon(Icons.person, size: 40)
+                              : null,
+                        ),
                       ),
+                      const SizedBox(height: 10),
+                      Text(
+                        user.name,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        user.email,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        user.bio ?? "",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                     ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "Name",
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                "Email@example.com",
-                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black),
+                  );
+                },
               ),
               SizedBox(height: 20),
               Column(
@@ -206,9 +251,34 @@ class ProfilePage extends StatelessWidget {
                   SizedBox(height: 30),
                   Center(
                     child: GestureDetector(
-                      onTap: () => print("Sign Out"),
+                      onTap: () async {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (_) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+
+                        final success = await AuthService.logout();
+
+                        Navigator.of(context, rootNavigator: true).pop();
+
+                        if (success) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const LoginPage()),
+                            (route) => false,
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Logout gagal")),
+                          );
+                        }
+                      },
                       child: Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           vertical: 10,
                           horizontal: 10,
                         ),
@@ -285,50 +355,51 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _sectionTitle(String title) => Text(
-    title,
-    style: GoogleFonts.poppins(
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-      color: Color(0xFF9B7EBD),
-    ),
-  );
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF9B7EBD),
+        ),
+      );
 
   Widget _menuBox({required List<Widget> children}) => Container(
-    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-    decoration: BoxDecoration(
-      color: Color(0xFF9B7EBD),
-      borderRadius: BorderRadius.circular(25),
-    ),
-    child: Column(children: children),
-  );
+        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        decoration: BoxDecoration(
+          color: Color(0xFF9B7EBD),
+          borderRadius: BorderRadius.circular(25),
+        ),
+        child: Column(children: children),
+      );
 
   Widget _menuItem({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
-  }) => GestureDetector(
-    onTap: onTap,
-    child: Row(
-      children: [
-        Container(
-          width: 45,
-          height: 45,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Color(0xFF7B5FA7)),
+  }) =>
+      GestureDetector(
+        onTap: onTap,
+        child: Row(
+          children: [
+            Container(
+              width: 45,
+              height: 45,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Color(0xFF7B5FA7)),
+            ),
+            SizedBox(width: 16),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
-        SizedBox(width: 16),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }

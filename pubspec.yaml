@@ -15,10 +15,10 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # HTTP & API
-  http: ^1.2.0
+  http: ^1.6.0
 
   # Local Storage
-  shared_preferences: ^2.2.2
+  shared_preferences: ^2.5.4
 
   # State Management (Language)
   provider: ^6.1.2

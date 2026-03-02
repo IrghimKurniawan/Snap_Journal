@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/auth/login.dart';
 import 'package:snap_journal/auth/verification.dart';
+import 'package:snap_journal/services/auth_services.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -130,12 +131,63 @@ class _RegisterPageState extends State<RegisterPage> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => VerificationPage(),
-                              ),
-                            ),
+                            onPressed: () async {
+                              final name = nameController.text.trim();
+                              final email = emailController.text.trim();
+                              final password = passwordController.text.trim();
+                              final confirmPassword =
+                                  confirmPasswordController.text.trim();
+
+                              // VALIDASI
+                              if (name.isEmpty ||
+                                  email.isEmpty ||
+                                  password.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Semua field wajib diisi")),
+                                );
+                                return;
+                              }
+
+                              if (password != confirmPassword) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Password tidak sama")),
+                                );
+                                return;
+                              }
+
+                              // LOADING (optional tapi bagus)
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                    child: CircularProgressIndicator()),
+                              );
+
+                              final success = await AuthService.register(
+                                name: name,
+                                email: email,
+                                password: password,
+                              );
+
+                              Navigator.of(context, rootNavigator: true).pop();
+
+                              if (success) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        VerificationPage(email: email),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Register gagal")),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFF5F0FF),
                               foregroundColor: const Color(0xFF9B7EBD),
@@ -182,33 +234,33 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _label(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      fontSize: 14,
-      color: Color(0xFFF5F0FF),
-      fontWeight: FontWeight.bold,
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          fontSize: 14,
+          color: Color(0xFFF5F0FF),
+          fontWeight: FontWeight.bold,
+        ),
+      );
 
   Widget _field({
     required TextEditingController controller,
     required String hint,
     bool obscure = false,
-  }) => TextField(
-    controller: controller,
-    obscureText: obscure,
-    decoration: InputDecoration(
-      hintText: hint,
-      hintStyle: GoogleFonts.poppins(color: Color(0xFF9B7EBD)),
-      filled: true,
-      fillColor: Color(0xFFF5F0FF).withOpacity(0.9),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      suffixIcon: obscure
-          ? Icon(Icons.visibility_off, color: Colors.grey)
-          : null,
-    ),
-  );
+  }) =>
+      TextField(
+        controller: controller,
+        obscureText: obscure,
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.poppins(color: Color(0xFF9B7EBD)),
+          filled: true,
+          fillColor: Color(0xFFF5F0FF).withOpacity(0.9),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          suffixIcon:
+              obscure ? Icon(Icons.visibility_off, color: Colors.grey) : null,
+        ),
+      );
 }
