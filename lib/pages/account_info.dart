@@ -11,6 +11,7 @@ import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
+import 'package:snap_journal/services/profile_services.dart';
 
 class AccountInfoPage extends StatefulWidget {
   const AccountInfoPage({super.key});
@@ -19,19 +20,59 @@ class AccountInfoPage extends StatefulWidget {
 }
 
 class _AccountInfoPageState extends State<AccountInfoPage> {
-  final nameController = TextEditingController(text: 'Irghi');
-  final bioController = TextEditingController(text: 'Life is Happy');
-  final emailController = TextEditingController(text: 'Irghi@gmail.com');
+  late TextEditingController nameController;
+  late TextEditingController bioController;
+  late TextEditingController emailController;
   final passwordController = TextEditingController(text: '**********');
 
   @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    bioController = TextEditingController();
+    emailController = TextEditingController();
+
+    loadProfile();
+  }
+
+  Future<void> loadProfile() async {
+    final user = await ProfileServices.getProfile();
+
+    if (user != null) {
+      setState(() {
+        nameController.text = user.name;
+        bioController.text = user.bio ?? "";
+        emailController.text = user.email;
+      });
+    }
+  }
+
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
 
-    void saveChanges() {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t['changes_saved']!)));
+    void saveChanges() async {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final success = await ProfileServices.updateProfile(
+        name: nameController.text.trim(),
+        bio: bioController.text.trim(),
+      );
+
+      Navigator.of(context, rootNavigator: true).pop();
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t['changes_saved']!)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Update gagal")),
+        );
+      }
     }
 
     void deleteAccount() {
@@ -274,32 +315,34 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
   }
 
   Widget _label(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      color: Colors.white,
-      fontWeight: FontWeight.w600,
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      );
 
   Widget _field({
     required TextEditingController controller,
     bool readOnly = false,
     bool obscure = false,
     Widget? suffix,
-  }) => TextField(
-    controller: controller,
-    readOnly: readOnly,
-    obscureText: obscure,
-    style: GoogleFonts.poppins(color: Colors.black),
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      suffixIcon: suffix,
-    ),
-  );
+  }) =>
+      TextField(
+        controller: controller,
+        readOnly: readOnly,
+        obscureText: obscure,
+        style: GoogleFonts.poppins(color: Colors.black),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          suffixIcon: suffix,
+        ),
+      );
 }

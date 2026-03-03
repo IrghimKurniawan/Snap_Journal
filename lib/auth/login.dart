@@ -5,6 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/auth/register.dart';
 import 'package:snap_journal/pages/dashboard.dart';
+import 'package:snap_journal/services/auth_services.dart';
+import 'package:snap_journal/models/login_request.dart';
+import 'package:snap_journal/models/login_response.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -165,12 +169,61 @@ class _LoginPageState extends State<LoginPage> {
                         width: double.infinity,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DashboardPage(),
-                            ),
-                          ),
+                          onPressed: () async {
+                            final email = emailController.text.trim();
+                            final password = passwordController.text.trim();
+
+                            if (email.isEmpty || password.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text("Email & Password wajib diisi")),
+                              );
+                              return;
+                            }
+
+                            // Loading dialog
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+
+                            final result = await AuthService.login(
+                              email: email,
+                              password: password,
+                            );
+
+                            // Close loading dialog
+                            Navigator.pop(context);   
+
+                            if (result != null) {
+                              // simpan token
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString(
+                                  "token", result.accessToken);
+                              await prefs.setString(
+                                  "refreshToken", result.refreshToken);
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Login berhasil")),
+                              );
+
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const DashboardPage(),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Login gagal")),
+                              );
+                            }
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFFF5F0FF),
                             foregroundColor: const Color(0xFF9B7EBD),

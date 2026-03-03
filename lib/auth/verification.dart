@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/models/verify_request.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/auth/login.dart';
+import 'package:snap_journal/services/auth_services.dart';
 
 class VerificationPage extends StatefulWidget {
-  const VerificationPage({super.key});
+  final String email;
+
+  const VerificationPage({super.key, required this.email});
   @override
   State<VerificationPage> createState() => _VerificationPageState();
 }
 
 class _VerificationPageState extends State<VerificationPage> {
+  final otp1 = TextEditingController();
+  final otp2 = TextEditingController();
+  final otp3 = TextEditingController();
+  final otp4 = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
@@ -94,35 +102,41 @@ class _VerificationPageState extends State<VerificationPage> {
                       SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(
-                          4,
-                          (index) => SizedBox(
-                            width: 55,
-                            height: 55,
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              maxLength: 1,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              decoration: InputDecoration(
-                                counterText: "",
-                                filled: true,
-                                fillColor: Color(0xFFF5F0FF),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide.none,
-                                ),
-                              ),
-                              onChanged: (value) {
-                                if (value.length == 1)
-                                  FocusScope.of(context).nextFocus();
-                              },
-                            ),
-                          ),
-                        ),
+                        children: [
+                          _otpField(otp1),
+                          _otpField(otp2),
+                          _otpField(otp3),
+                          _otpField(otp4),
+                        ],
+                        // children: List.generate(
+                        //   4,
+                        //   (index) => SizedBox(
+                        //     width: 55,
+                        //     height: 55,
+                        //     child: TextField(
+                        //       keyboardType: TextInputType.number,
+                        //       textAlign: TextAlign.center,
+                        //       maxLength: 1,
+                        //       style: const TextStyle(
+                        //         fontSize: 20,
+                        //         fontWeight: FontWeight.bold,
+                        //       ),
+                        //       decoration: InputDecoration(
+                        //         counterText: "",
+                        //         filled: true,
+                        //         fillColor: Color(0xFFF5F0FF),
+                        //         border: OutlineInputBorder(
+                        //           borderRadius: BorderRadius.circular(10),
+                        //           borderSide: BorderSide.none,
+                        //         ),
+                        //       ),
+                        //       onChanged: (value) {
+                        //         if (value.length == 1)
+                        //           FocusScope.of(context).nextFocus();
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
                       ),
                       SizedBox(height: 15),
                       Row(
@@ -136,12 +150,44 @@ class _VerificationPageState extends State<VerificationPage> {
                             ),
                           ),
                           ElevatedButton(
-                            onPressed: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => LoginPage(),
-                              ),
-                            ),
+                            onPressed: () async {
+                              final otp =
+                                  otp1.text + otp2.text + otp3.text + otp4.text;
+
+                              if (otp.length != 4) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("OTP harus 4 digit")),
+                                );
+                                return;
+                              }
+
+                              final request = VerifyRequestModel(
+                                email: widget.email,
+                                otp: otp,
+                              );
+
+                              final result =
+                                  await AuthService.verifyEmail(request);
+
+                              if (result != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(result.message)),
+                                );
+
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginPage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Verifikasi gagal")),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFF5F0FF),
                               foregroundColor: Color(0xFF9B7EBD),
@@ -160,6 +206,37 @@ class _VerificationPageState extends State<VerificationPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _otpField(TextEditingController controller) {
+    return SizedBox(
+      width: 55,
+      height: 55,
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        maxLength: 1,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        decoration: InputDecoration(
+          counterText: "",
+          filled: true,
+          fillColor: const Color(0xFFF5F0FF),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {
+          if (value.length == 1) {
+            FocusScope.of(context).nextFocus();
+          }
+        },
       ),
     );
   }
