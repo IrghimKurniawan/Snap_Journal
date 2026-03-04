@@ -165,7 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                     child: CircularProgressIndicator()),
                               );
 
-                              final success = await AuthService.register(
+                              final success = await AuthServices.register(
                                 name: name,
                                 email: email,
                                 password: password,

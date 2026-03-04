@@ -3,11 +3,13 @@ import 'package:http/http.dart' as http;
 import 'package:snap_journal/models/login_request.dart';
 import 'package:snap_journal/models/login_response.dart';
 import 'package:snap_journal/models/register_model.dart';
+import 'package:snap_journal/models/response_forgot_password.dart';
+import 'package:snap_journal/models/verify_otp_request.dart';
 import 'package:snap_journal/models/verify_request.dart';
 import 'package:snap_journal/models/verify_response.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class AuthService {
+class AuthServices {
   static const String baseUrl = "https://api-znp6gyu5hq-et.a.run.app";
 
   /// REGISTER
@@ -94,32 +96,107 @@ class AuthService {
       return null;
     }
   }
+
   static Future<bool> logout() async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString("token");
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
 
-  if (token == null) return false;
+    if (token == null) return false;
 
-  final url = Uri.parse(
-    "https://api-znp6gyu5hq-et.a.run.app/api/v1/auth/logout",
-  );
+    final url = Uri.parse(
+      "https://api-znp6gyu5hq-et.a.run.app/api/v1/auth/logout",
+    );
 
-  final response = await http.delete(
-    url,
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": "Bearer $token", 
-    },
-  );
+    final response = await http.delete(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
 
-  print("LOGOUT STATUS: ${response.statusCode}");
-  print("LOGOUT BODY: ${response.body}");
+    print("LOGOUT STATUS: ${response.statusCode}");
+    print("LOGOUT BODY: ${response.body}");
 
-  if (response.statusCode == 200) {
-    await prefs.clear(); // hapus token lokal
-    return true;
-  } else {
-    return false;
+    if (response.statusCode == 200) {
+      await prefs.clear(); // hapus token lokal
+      return true;
+    } else {
+      return false;
+    }
   }
-}
+
+  static Future<ForgotPasswordResponse> forgotPassword(String email) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/forgot-password'),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "email": email,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return ForgotPasswordResponse.fromJson(data);
+    } else {
+      throw Exception(data["message"] ?? "Server error");
+    }
+  }
+
+  static Future<VerifyOtpResponse> verifyOtp(
+    String email,
+    String otp,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/forgot-password/verify'),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "email": email,
+        "otp": otp,
+      }),
+    );
+
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return VerifyOtpResponse.fromJson(data);
+    } else {
+      throw Exception(data["message"] ?? response.body);
+    }
+  }
+
+  static Future<Map<String, dynamic>> resetPassword(
+    String email,
+    String otp,
+    String newPassword,
+    String confirmPassword,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/v1/auth/reset-password'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "otp": otp,
+        "password": newPassword,
+        "password_confirmation": confirmPassword, // 🔥 TAMBAH INI
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception(jsonDecode(response.body)['errors'] ?? response.body);
+    }
+  }
 }

@@ -168,7 +168,7 @@ class _VerificationPageState extends State<VerificationPage> {
                               );
 
                               final result =
-                                  await AuthService.verifyEmail(request);
+                                  await AuthServices.verifyEmail(request);
 
                               if (result != null) {
                                 ScaffoldMessenger.of(context).showSnackBar(

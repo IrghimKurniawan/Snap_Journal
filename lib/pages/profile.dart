@@ -260,7 +260,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                         );
 
-                        final success = await AuthService.logout();
+                        final success = await AuthServices.logout();
 
                         Navigator.of(context, rootNavigator: true).pop();
 

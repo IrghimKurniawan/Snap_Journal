@@ -168,6 +168,21 @@ class LanguageProvider extends ChangeNotifier {
     'full_name': 'Full Name',
     'confirm_password_label': 'Confirm Password',
     'have_account': 'Already have an account? Login.',
+
+    //forgot password email
+    'forgot_password_title': 'Forgot Password',
+    'enter_email': 'Enter Your Email',
+    'send': 'Send',
+
+    //forgot password otp
+    'enter_otp': 'OTP has been sent to your email address.',
+    'send_otp': 'Enter Otp',
+
+    //enter password
+    'reset_password_title': 'Reset Password',
+    'enter_new_password': 'Enter New Password',
+    'confirm_new_password': 'Confirm New Password',
+    'update_password': 'Update Password',
   };
 
   // ===================== INDONESIA =====================
@@ -317,5 +332,20 @@ class LanguageProvider extends ChangeNotifier {
     'full_name': 'Nama Lengkap',
     'confirm_password_label': 'Konfirmasi Kata Sandi',
     'have_account': 'Sudah punya akun? Masuk.',
+
+    //forgot password email
+    'forgot_password_title': 'Lupa Kata Sandi',
+    'enter_email': 'Masukkan Email',
+    'send': 'Kirim',
+
+    //forgot password otp
+    'enter_otp': 'Masukan Otp untuk melanjutkan',
+    'send_otp': 'Kirim Otp',
+
+    //enter password
+    'reset_password_title': 'Atur Ulang Kata Sandi',
+    'enter_new_password': 'Masukkan Kata Sandi Baru',
+    'confirm_new_password': 'Konfirmasi Kata Sandi Baru',
+    'update_password': 'Perbarui Kata Sandi',
   };
 }
