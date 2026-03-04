@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/auth/forgot_password_email.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/auth/register.dart';
 import 'package:snap_journal/pages/dashboard.dart';
@@ -157,13 +158,23 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
+                     GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ForgotPassword(),
+                          ),
+                        );
+                      },
+                      child:  Text(
                         t['forgot_password']!,
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Color(0xFFF5F0FF).withOpacity(0.8),
                         ),
                       ),
+                     ),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
@@ -191,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             );
 
-                            final result = await AuthService.login(
+                            final result = await AuthServices.login(
                               email: email,
                               password: password,
                             );
