@@ -1,7 +1,4 @@
 // lib/pages/dashboard.dart
-// BAGIAN YANG DIUBAH: Feeling selector sekarang tersambung ke API
-// Salin seluruh file ini untuk mengganti dashboard.dart yang lama
-
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -23,11 +20,11 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  int selectedIndex = -1; // -1 = belum pilih hari ini
+  int selectedIndex = -1;
   bool _isSavingFeeling = false;
 
-  // Mapping index → nilai feeling yang dikirim ke API
-  final List<String> _feelingValues = ['happy', 'calm', 'sad', 'neutral'];
+  // Nilai yang dikirim ke API — huruf kapital sesuai backend
+  final List<String> _feelingValues = ['Happy', 'Calm', 'Sad', 'Neutral'];
   final List<String> _emojis = ["😍", "😄", "😢", "🙂"];
 
   @override
@@ -36,7 +33,6 @@ class _DashboardPageState extends State<DashboardPage> {
     _loadTodayFeeling();
   }
 
-  // Saat buka dashboard, cek apakah sudah ada feeling hari ini
   Future<void> _loadTodayFeeling() async {
     final feeling = await FeelingServices.getTodayFeeling();
     if (feeling != null && mounted) {
@@ -47,9 +43,8 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
-  // Saat user tap emoji, simpan ke API
   Future<void> _onFeelingTap(int index) async {
-    if (_isSavingFeeling) return; // cegah double tap
+    if (_isSavingFeeling) return;
 
     setState(() {
       selectedIndex = index;
@@ -181,7 +176,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              // ─── FEELING SELECTOR ───
               Column(
                 children: [
                   Stack(
@@ -214,7 +208,6 @@ class _DashboardPageState extends State<DashboardPage> {
                           );
                         }),
                       ),
-                      // Loading indicator saat menyimpan
                       if (_isSavingFeeling)
                         const CircularProgressIndicator(
                             color: Color(0xFF7B5FA7)),
@@ -255,7 +248,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 15),
-              // ─── LATEST MEMORY CARD (tetap sama, belum ada API journal) ───
               Container(
                 width: 310,
                 height: 220,
@@ -339,7 +331,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               const SizedBox(height: 15),
-              // ─── DAILY INSIGHT ───
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,

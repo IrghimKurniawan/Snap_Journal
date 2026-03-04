@@ -13,52 +13,48 @@ class MediaServices {
   }
 
   /// POST upload gambar
-  /// Terima File dari image_picker, kirim sebagai multipart
+  /// Field name: "image"
   static Future<MediaModel?> uploadImage(File imageFile) async {
     final token = await _getToken();
     if (token == null) return null;
 
-    final url = Uri.parse("$baseUrl/api/v1/media/upload");
+    final url = Uri.parse("$baseUrl/api/v1/media/editor-image");
 
-    // Buat request multipart (untuk upload file)
     final request = http.MultipartRequest('POST', url);
+    request.headers['Authorization'] = "Bearer $token";
 
-    // Tambahkan header Authorization
-    request.headers['Authorization'] = 'Bearer $token';
-
-    // Tambahkan file gambar ke request
     final fileName = imageFile.path.split('/').last;
     request.files.add(
       await http.MultipartFile.fromPath(
-        'file', // nama field yang diminta backend (tanya BE developer jika beda)
+        'image', // ← field name
         imageFile.path,
         filename: fileName,
       ),
     );
 
-    print("UPLOAD IMAGE to: $url");
+    print("UPLOAD IMAGE: $fileName");
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
 
-    print("UPLOAD IMAGE STATUS: ${response.statusCode}");
-    print("UPLOAD IMAGE BODY: ${response.body}");
+    print("UPLOAD STATUS: ${response.statusCode}");
+    print("UPLOAD BODY: ${response.body}");
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final body = jsonDecode(response.body);
-      final data = body['data'];
+      final data = body['data'] ?? body;
       return MediaModel.fromJson(data);
     } else {
       return null;
     }
   }
 
-  /// DELETE hapus gambar berdasarkan id
-  static Future<bool> deleteMedia(String mediaId) async {
+  /// DELETE hapus gambar berdasarkan URL
+  static Future<bool> deleteMedia(String fileUrl) async {
     final token = await _getToken();
     if (token == null) return false;
 
-    final url = Uri.parse("$baseUrl/api/v1/media/$mediaId");
+    final url = Uri.parse("$baseUrl/api/v1/media/editor-image");
 
     final response = await http.delete(
       url,
@@ -66,6 +62,9 @@ class MediaServices {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
+      body: jsonEncode({
+        "file_url": fileUrl, // ← kirim URL
+      }),
     );
 
     print("DELETE MEDIA STATUS: ${response.statusCode}");

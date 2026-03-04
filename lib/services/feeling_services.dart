@@ -12,7 +12,6 @@ class FeelingServices {
   }
 
   /// POST simpan perasaan hari ini
-  /// feeling: 'happy' | 'calm' | 'sad' | 'neutral'
   static Future<bool> saveFeeling(String feeling) async {
     final token = await _getToken();
     if (token == null) return false;
@@ -26,7 +25,7 @@ class FeelingServices {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "feeling": feeling,
+        "mood": feeling,
       }),
     );
 
@@ -57,6 +56,7 @@ class FeelingServices {
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
       final data = body['data'];
+      if (data == null) return null;
       return FeelingModel.fromJson(data);
     } else {
       return null;

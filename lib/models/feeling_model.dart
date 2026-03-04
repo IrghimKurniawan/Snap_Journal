@@ -1,24 +1,23 @@
 class FeelingModel {
-  final String id;
-  final String feeling; // 'happy' | 'calm' | 'sad' | 'neutral'
-  final String date;
+  final String? id;
+  final String feeling;
+  final String? date;
 
   FeelingModel({
-    required this.id,
+    this.id,
     required this.feeling,
-    required this.date,
+    this.date,
   });
 
   factory FeelingModel.fromJson(Map<String, dynamic> json) {
     return FeelingModel(
-      id: json['id'].toString(),
-      feeling: json['feeling'] ?? '',
-      date: json['date'] ?? '',
+      id: json['id']?.toString(),
+      feeling: json['mood'] ?? json['feeling'] ?? '',
+      date: json['date'],
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'feeling': feeling,
-        'date': date,
+        "mood": feeling,
       };
 }

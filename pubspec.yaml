@@ -29,6 +29,9 @@ dependencies:
   # Toggle Switch (untuk Themes page)
   toggle_switch: ^2.1.0
 
+  # Image Picker (untuk upload foto/video)
+  image_picker: ^1.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

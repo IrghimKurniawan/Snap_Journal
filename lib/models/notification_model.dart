@@ -1,5 +1,3 @@
-// lib/models/notification_model.dart
-
 class NotificationModel {
   final String id;
   final String title;
@@ -19,12 +17,10 @@ class NotificationModel {
     return NotificationModel(
       id: json['id'].toString(),
       title: json['title'] ?? '',
-      message: json['message'] ?? json['body'] ?? '',
-      isRead: json['isRead'] ?? json['is_read'] ?? false,
-      createdAt: DateTime.tryParse(
-            json['createdAt'] ?? json['created_at'] ?? '',
-          ) ??
-          DateTime.now(),
+      message: json['message'] ?? '',
+      // read_at berisi tanggal jika sudah dibaca, null jika belum
+      isRead: json['read_at'] != null,
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ?? DateTime.now(),
     );
   }
 }
