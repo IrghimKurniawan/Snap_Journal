@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 
 class ChangeEmail extends StatefulWidget {
@@ -75,6 +76,31 @@ class _ChangeEmailState extends State<ChangeEmail> {
                 hintText: "------",
                 hintStyle: GoogleFonts.poppins(fontSize: 18, letterSpacing: 6),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                suffixIcon: TextButton(
+                  onPressed: () async {
+                    final newEmail = newEmailController.text.trim();
+
+                    if (newEmail.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Isi email baru dulu")),
+                      );
+                      return;
+                    }
+
+                    final res = await AuthServices.changeEmail(newEmail);
+
+                    if (res['success'] == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("OTP sent to email")),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(res['message'] ?? "Failed")),
+                      );
+                    }
+                  },
+                  child: const Text("Send"),
+                ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: primaryColor, width: 1.5),
@@ -124,7 +150,43 @@ class _ChangeEmailState extends State<ChangeEmail> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  final newEmail = newEmailController.text.trim();
+
+                  if (newEmail.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please enter new email"),
+                      ),
+                    );
+                    return;
+                  }
+
+                  try {
+                    final res = await AuthServices.changeEmail(newEmail);
+
+                    if (res['success'] == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("OTP has been sent to your new email"),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text(res['message'] ?? "Failed to change email"),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Error: $e"),
+                      ),
+                    );
+                  }
+                },
                 child: Text(
                   t['save_changes']!,
                   style: GoogleFonts.poppins(
@@ -142,33 +204,35 @@ class _ChangeEmailState extends State<ChangeEmail> {
   }
 
   Widget _buildLabel(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      fontWeight: FontWeight.w600,
-      color: primaryColor,
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.w600,
+          color: primaryColor,
+        ),
+      );
 
   Widget _buildField({
     required TextEditingController controller,
     bool readOnly = false,
     String? hint,
     TextInputType? keyboardType,
-  }) => TextField(
-    controller: controller,
-    readOnly: readOnly,
-    keyboardType: keyboardType,
-    style: GoogleFonts.poppins(),
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      hintText: hint,
-      hintStyle: GoogleFonts.poppins(fontSize: 13),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-    ),
-  );
+  }) =>
+      TextField(
+        controller: controller,
+        readOnly: readOnly,
+        keyboardType: keyboardType,
+        style: GoogleFonts.poppins(),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          hintText: hint,
+          hintStyle: GoogleFonts.poppins(fontSize: 13),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+      );
 }
