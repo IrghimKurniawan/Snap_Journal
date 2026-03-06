@@ -1,5 +1,5 @@
 // lib/pages/new_journal.dart
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -19,8 +19,9 @@ class _AddJournalState extends State<AddJournal> {
   final titleController = TextEditingController();
   final noteController = TextEditingController();
 
-  List<String> _uploadedImageUrls = []; // URL hasil upload
-  List<File> _selectedImages = []; // File lokal untuk preview
+  List<String> _uploadedImageUrls = [];
+  List<Uint8List> _selectedImageBytes = [];
+  XFile? _selectedVideo;
   bool _isUploadingImage = false;
   bool _isSaving = false;
 
@@ -42,27 +43,46 @@ class _AddJournalState extends State<AddJournal> {
 
     if (picked == null) return;
 
-    final file = File(picked.path);
-
     setState(() => _isUploadingImage = true);
 
-    final result = await MediaServices.uploadImage(file);
-
-    setState(() => _isUploadingImage = false);
+    final result = await MediaServices.uploadImageFromXFile(picked);
 
     if (result != null) {
+      final bytes = await picked.readAsBytes();
       setState(() {
         _uploadedImageUrls.add(result.url);
-        _selectedImages.add(file);
+        _selectedImageBytes.add(bytes);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Foto berhasil diupload!")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Foto berhasil diupload!")),
+        );
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal upload foto")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gagal upload foto")),
+        );
+      }
     }
+
+    setState(() => _isUploadingImage = false);
+  }
+
+  // Pilih video
+  Future<void> _pickVideo() async {
+    final picked = await _picker.pickVideo(
+      source: ImageSource.gallery,
+      maxDuration: const Duration(minutes: 5),
+    );
+
+    if (picked == null) return;
+
+    setState(() => _selectedVideo = picked);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Video dipilih: ${picked.name}")),
+    );
   }
 
   // Hapus foto
@@ -71,8 +91,13 @@ class _AddJournalState extends State<AddJournal> {
     await MediaServices.deleteMedia(url);
     setState(() {
       _uploadedImageUrls.removeAt(index);
-      _selectedImages.removeAt(index);
+      _selectedImageBytes.removeAt(index);
     });
+  }
+
+  // Hapus video
+  void _removeVideo() {
+    setState(() => _selectedVideo = null);
   }
 
   // Save journal
@@ -84,30 +109,44 @@ class _AddJournalState extends State<AddJournal> {
       return;
     }
 
+    // Kalau publish, video wajib
+    if (!isDraft && _selectedVideo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Video wajib diisi untuk publish jurnal!")),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     final success = await JournalServices.createJournal(
       title: titleController.text.trim(),
       note: noteController.text.trim(),
       imageUrls: _uploadedImageUrls,
+      videoFile: _selectedVideo,
       isDraft: isDraft,
     );
 
     setState(() => _isSaving = false);
 
     if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(isDraft
-              ? "Jurnal disimpan sebagai draft!"
-              : "Jurnal berhasil disimpan!"),
-        ),
-      );
-      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isDraft
+                ? "Jurnal disimpan sebagai draft!"
+                : "Jurnal berhasil dipublish!"),
+          ),
+        );
+        Navigator.pop(context);
+      }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal menyimpan jurnal")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Gagal menyimpan jurnal")),
+        );
+      }
     }
   }
 
@@ -151,7 +190,6 @@ class _AddJournalState extends State<AddJournal> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tanggal
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         height: 28,
@@ -177,7 +215,6 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Title
                       Text(
                         t['title']!,
                         style: GoogleFonts.poppins(
@@ -208,7 +245,6 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Note
                       Text(
                         t['note']!,
                         style: GoogleFonts.poppins(
@@ -242,7 +278,7 @@ class _AddJournalState extends State<AddJournal> {
                 ),
                 const SizedBox(height: 12),
 
-                // ─── MEDIA ───
+                // ─── FOTO ───
                 Container(
                   padding:
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -263,7 +299,6 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      // Tombol pilih foto
                       GestureDetector(
                         onTap: _isUploadingImage ? null : _pickAndUploadImage,
                         child: Container(
@@ -280,7 +315,7 @@ class _AddJournalState extends State<AddJournal> {
                               : Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.camera_alt,
+                                    const Icon(Icons.photo,
                                         color: Colors.white, size: 28),
                                     const SizedBox(height: 8),
                                     Text(
@@ -295,22 +330,14 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      // Preview foto yang sudah diupload
-                      if (_selectedImages.isNotEmpty) ...[
-                        Text(
-                          t['preview']!,
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFFF5F0FF),
-                          ),
-                        ),
+                      // Preview foto
+                      if (_selectedImageBytes.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         SizedBox(
                           height: 100,
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: _selectedImages.length,
+                            itemCount: _selectedImageBytes.length,
                             itemBuilder: (context, index) {
                               return Stack(
                                 children: [
@@ -321,13 +348,12 @@ class _AddJournalState extends State<AddJournal> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       image: DecorationImage(
-                                        image:
-                                            FileImage(_selectedImages[index]),
+                                        image: MemoryImage(
+                                            _selectedImageBytes[index]),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
-                                  // Tombol hapus foto
                                   Positioned(
                                     top: 0,
                                     right: 8,
@@ -354,6 +380,111 @@ class _AddJournalState extends State<AddJournal> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 12),
+
+                // ─── VIDEO (WAJIB UNTUK PUBLISH) ───
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF9B7EBD),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "Video",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFF5F0FF),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Text(
+                              "Wajib untuk Publish",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 10),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _pickVideo,
+                        child: Container(
+                          height: 90,
+                          decoration: BoxDecoration(
+                            color: _selectedVideo != null
+                                ? Colors.green.withOpacity(0.3)
+                                : const Color(0xFF9B7EBD),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _selectedVideo != null
+                                  ? Colors.green
+                                  : Colors.white,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _selectedVideo != null
+                                    ? Icons.check_circle
+                                    : Icons.videocam,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                _selectedVideo != null
+                                    ? _selectedVideo!.name
+                                    : "Pilih Video",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Tombol hapus video
+                      if (_selectedVideo != null) ...[
+                        const SizedBox(height: 8),
+                        GestureDetector(
+                          onTap: _removeVideo,
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.delete_outline,
+                                  color: Colors.white70, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                "Hapus Video",
+                                style: TextStyle(
+                                    color: Colors.white70, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 15),
 
                 // ─── TOMBOL SAVE ───
@@ -373,7 +504,7 @@ class _AddJournalState extends State<AddJournal> {
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(Icons.save,
+                                const Icon(Icons.publish,
                                     color: Color(0xFFF5F0FF), size: 28),
                                 const SizedBox(width: 10),
                                 Text(

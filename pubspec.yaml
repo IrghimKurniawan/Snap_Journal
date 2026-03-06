@@ -16,6 +16,12 @@ dependencies:
 
   # HTTP & API
   http: ^1.6.0
+ 
+  # Video Player
+  video_player: ^2.8.1
+
+  # HTTP Parser (untuk upload di web)
+  http_parser: ^4.0.2
 
   # Local Storage
   shared_preferences: ^2.5.4
