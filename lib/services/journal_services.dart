@@ -1,4 +1,3 @@
-// lib/services/journal_services.dart
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -115,25 +114,6 @@ class JournalServices {
     }
   }
 
-  /// DELETE journal
-  static Future<bool> deleteJournal(String id) async {
-    final token = await _getToken();
-    if (token == null) return false;
-
-    try {
-      final response = await http.delete(
-        Uri.parse("$baseUrl/api/v1/journals/$id"),
-        headers: {"Authorization": "Bearer $token"},
-      ).timeout(const Duration(seconds: 30));
-
-      print("DELETE JOURNAL STATUS: ${response.statusCode}");
-      return response.statusCode == 200;
-    } catch (e) {
-      print("DELETE JOURNAL ERROR: $e");
-      return false;
-    }
-  }
-
   /// GET detail satu journal
   static Future<Map<String, dynamic>?> getJournalById(String id) async {
     final token = await _getToken();
@@ -158,18 +138,121 @@ class JournalServices {
     }
   }
 
-  /// PATCH toggle favorit
-  static Future<bool> toggleFavorite(String id) async {
+  /// DELETE journal
+  static Future<bool> deleteJournal(String id) async {
     final token = await _getToken();
     if (token == null) return false;
 
     try {
-      final response = await http.patch(
-        Uri.parse("$baseUrl/api/v1/journals/$id/favorite"),
+      final response = await http.delete(
+        Uri.parse("$baseUrl/api/v1/journals/$id"),
         headers: {"Authorization": "Bearer $token"},
       ).timeout(const Duration(seconds: 30));
 
+      print("DELETE JOURNAL STATUS: ${response.statusCode}");
+      return response.statusCode == 200;
+    } catch (e) {
+      print("DELETE JOURNAL ERROR: $e");
+      return false;
+    }
+  }
+
+  /// PUT update konten journal
+  static Future<bool> updateJournal({
+    required String id,
+    required String title,
+    required String note,
+    required List<String> imageUrls,
+    XFile? videoFile,
+  }) async {
+    final token = await _getToken();
+    if (token == null) return false;
+
+    final url = Uri.parse("$baseUrl/api/v1/journals/$id");
+
+    try {
+      final request = http.MultipartRequest('PUT', url);
+      request.headers['Authorization'] = "Bearer $token";
+
+      if (title.isNotEmpty) request.fields['title'] = title;
+      if (note.isNotEmpty) request.fields['note'] = note;
+      if (imageUrls.isNotEmpty) {
+        request.fields['images'] = jsonEncode(imageUrls);
+      }
+
+      if (videoFile != null) {
+        final videoBytes = await videoFile.readAsBytes();
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'video',
+            videoBytes,
+            filename: videoFile.name,
+            contentType: MediaType('video', 'mp4'),
+          ),
+        );
+      }
+
+      final streamedResponse =
+          await request.send().timeout(const Duration(seconds: 60));
+      final response = await http.Response.fromStream(streamedResponse);
+
+      print("UPDATE JOURNAL STATUS: ${response.statusCode}");
+      print("UPDATE JOURNAL BODY: ${response.body}");
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("UPDATE JOURNAL ERROR: $e");
+      return false;
+    }
+  }
+
+  /// PATCH publish draft → jadikan published
+  static Future<bool> publishDraft(String id) async {
+    final token = await _getToken();
+    if (token == null) return false;
+
+    try {
+      final response = await http
+          .patch(
+            Uri.parse("$baseUrl/api/v1/journals/$id/draft"),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode({"is_draft": false}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      print("PUBLISH DRAFT STATUS: ${response.statusCode}");
+      print("PUBLISH DRAFT BODY: ${response.body}");
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print("PUBLISH DRAFT ERROR: $e");
+      return false;
+    }
+  }
+
+  /// PATCH toggle favorit
+  static Future<bool> toggleFavorite(String id, bool newValue) async {
+    final token = await _getToken();
+    if (token == null) return false;
+
+    try {
+      final response = await http
+          .patch(
+            Uri.parse("$baseUrl/api/v1/journals/$id/favorite"),
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer $token",
+            },
+            body: jsonEncode({"is_favorite": newValue}),
+          )
+          .timeout(const Duration(seconds: 30));
+
       print("TOGGLE FAVORITE STATUS: ${response.statusCode}");
+      print("TOGGLE FAVORITE BODY: ${response.body}");
+
       return response.statusCode == 200;
     } catch (e) {
       print("TOGGLE FAVORITE ERROR: $e");

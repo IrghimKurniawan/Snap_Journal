@@ -101,12 +101,12 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
                     : const Color(0xFF9B7EBD),
               ),
               onPressed: () async {
-                final success =
-                    await JournalServices.toggleFavorite(_journal!['id']);
+                final newValue = !(_journal!['is_favorite'] ?? false);
+                final success = await JournalServices.toggleFavorite(
+                    _journal!['id'], newValue);
                 if (success) {
                   setState(() {
-                    _journal!['is_favorite'] =
-                        !(_journal!['is_favorite'] ?? false);
+                    _journal!['is_favorite'] = newValue;
                   });
                 }
               },
@@ -161,7 +161,7 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
                                   child: Container(
                                     width: 60,
                                     height: 60,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       color: Colors.black45,
                                       shape: BoxShape.circle,
                                     ),

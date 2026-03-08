@@ -1,10 +1,11 @@
-// lib/additional pages/draft.dart
+// lib/pages/draft.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
 import 'package:snap_journal/services/journal_services.dart';
+import 'package:snap_journal/pages/edit_journal.dart';
 import 'package:intl/intl.dart';
 
 class DraftPage extends StatefulWidget {
@@ -170,7 +171,6 @@ class _DraftPageState extends State<DraftPage> {
                           ),
                           child: Stack(
                             children: [
-                              // Badge draft
                               Positioned(
                                 top: 10,
                                 right: 10,
@@ -179,7 +179,6 @@ class _DraftPageState extends State<DraftPage> {
                                   text: "Draft",
                                 ),
                               ),
-                              // Info jurnal di bawah
                               Align(
                                 alignment: Alignment.bottomCenter,
                                 child: Container(
@@ -227,7 +226,24 @@ class _DraftPageState extends State<DraftPage> {
                                             ),
                                           ),
                                           const SizedBox(width: 8),
-                                          // Tombol hapus
+                                          // Tombol edit
+                                          GestureDetector(
+                                            onTap: () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => EditJournalPage(
+                                                    draft: draft),
+                                              ),
+                                            ).then((updated) {
+                                              if (updated == true)
+                                                _loadDrafts();
+                                            }),
+                                            child: _badgeDraft(
+                                              icon: Icons.edit,
+                                              text: "Edit",
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
                                           GestureDetector(
                                             onTap: () =>
                                                 _deleteDraft(draft['id']),
