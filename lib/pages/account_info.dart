@@ -1,12 +1,11 @@
-// ===== account_info.dart =====
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/pages/otp_delete.dart';
 import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
-import 'package:snap_journal/additional%20pages/change_email.dart';
-import 'package:snap_journal/additional%20pages/change_password.dart';
+import 'package:snap_journal/additional pages/change_email.dart';
+import 'package:snap_journal/additional pages/change_password.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/insight.dart';
@@ -14,6 +13,9 @@ import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 import 'package:snap_journal/services/profile_services.dart';
+
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class AccountInfoPage extends StatefulWidget {
   const AccountInfoPage({super.key});
@@ -26,7 +28,11 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
   late TextEditingController nameController;
   late TextEditingController bioController;
   late TextEditingController emailController;
+
   final passwordController = TextEditingController(text: '**********');
+
+  File? _profileImage;
+  String? profileImageUrl;
 
   @override
   void initState() {
@@ -39,9 +45,9 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
     loadProfile();
   }
 
-  // ================================
-  // LOAD PROFILE
-  // ================================
+  /// ===============================
+  /// LOAD PROFILE
+  /// ===============================
 
   Future<void> loadProfile() async {
     final user = await ProfileServices.getProfile();
@@ -51,13 +57,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
         nameController.text = user.name;
         bioController.text = user.bio ?? "";
         emailController.text = user.email;
+        profileImageUrl = user.picture;
       });
     }
   }
 
-  // ================================
-  // SAVE PROFILE
-  // ================================
+  /// ===============================
+  /// SAVE PROFILE
+  /// ===============================
 
   void saveChanges() async {
     final t = Provider.of<LanguageProvider>(context, listen: false).text;
@@ -86,11 +93,11 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
     }
   }
 
-  // ================================
-  // DELETE ACCOUNT REQUEST OTP
-  // ================================
+  /// ===============================
+  /// DELETE ACCOUNT
+  /// ===============================
 
-  void requestDeleteAccount() async {
+  void deleteAccount() async {
     final result = await AuthServices.requestDeleteAccount();
 
     if (result['success'] == true) {
@@ -102,32 +109,69 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? "Failed request OTP"),
-        ),
+        SnackBar(content: Text(result['message'] ?? "Failed request OTP")),
       );
     }
   }
 
-  void deleteAccount() async {
-    final result = await AuthServices.requestDeleteAccount();
+  /// ===============================
+  /// PICK IMAGE
+  /// ===============================
 
-    print(result); // debug
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const DeleteAccountOtp(),
-      ),
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
     );
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+
+      await _uploadImage(_profileImage!);
     }
+  }
+
+  /// ===============================
+  /// UPLOAD IMAGE
+  /// ===============================
+
+  Future<void> _uploadImage(File image) async {
+    final success = await ProfileServices.uploadProfilePicture(image);
+
+    if (success) {
+      loadProfile();
+    }
+  }
+
+  /// ===============================
+  /// DELETE IMAGE
+  /// ===============================
+
+  Future<void> _deleteImage() async {
+    final success = await ProfileServices.deleteProfilePicture();
+
+    if (success) {
+      setState(() {
+        _profileImage = null;
+        profileImageUrl = null;
+      });
+    }
+  }
+
+  /// ===============================
+  /// UI
+  /// ===============================
+
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0FF),
-
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFFF5F0FF),
@@ -144,7 +188,6 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
           ),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -152,36 +195,51 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
             children: [
               /// PROFILE IMAGE
               Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: Container(
-                        width: 32,
-                        height: 32,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  onLongPress: _deleteImage,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B7EBD),
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                          size: 16,
+                          image: _profileImage != null
+                              ? DecorationImage(
+                                  image: FileImage(_profileImage!),
+                                  fit: BoxFit.cover,
+                                )
+                              : profileImageUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(profileImageUrl!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                          color: Colors.grey.shade300,
                         ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF9B7EBD),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -294,7 +352,7 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
 
               const SizedBox(height: 12),
 
-              /// DELETE BUTTON
+              /// DELETE ACCOUNT
               GestureDetector(
                 onTap: deleteAccount,
                 child: Container(
@@ -321,36 +379,24 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
           ),
         ),
       ),
-
-      /// BOTTOM NAVBAR
       bottomNavigationBar: CustomBottomNavbar(
         onHomeTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => DashboardPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => DashboardPage())),
         onJournalTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => JournalPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => JournalPage())),
         onInsightTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => InsightPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => InsightPage())),
         onProfileTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ProfilePage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => ProfilePage())),
         onFabTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AddJournal()),
-        ),
+            context, MaterialPageRoute(builder: (_) => AddJournal())),
       ),
     );
   }
 
-  // ================================
-  // WIDGET HELPER
-  // ================================
+  /// ===============================
+  /// WIDGET HELPER
+  /// ===============================
 
   Widget _label(String text) => Text(
         text,

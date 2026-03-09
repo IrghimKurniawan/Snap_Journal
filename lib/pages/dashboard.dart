@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/models/profileuser_model.dart';
 import 'package:snap_journal/services/journal_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/daily_insight.dart';
@@ -12,6 +13,7 @@ import 'package:snap_journal/additional%20pages/notification.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 import 'package:snap_journal/services/feeling_services.dart';
+import 'package:snap_journal/services/profile_services.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -33,25 +35,36 @@ class _DashboardPageState extends State<DashboardPage> {
   final List<String> _emojis = ["😍", "😄", "😢", "🙂"];
 
   @override
+  UserProfileModel? user;
+  String? profileImageUrl;
   void initState() {
     super.initState();
     _loadTodayFeeling();
     _loadDashboard();
+    loadProfile();
   }
 
+  Future<void> loadProfile() async {
+    final userData = await ProfileServices.getProfile();
+
+    setState(() {
+      user = userData;
+    });
+  }
 
   String? _getImageUrl() {
-  if (_latestJournal == null) return null;
+    if (_latestJournal == null) return null;
 
-  final media = _latestJournal!['media'] as List<dynamic>? ?? [];
+    final media = _latestJournal!['media'] as List<dynamic>? ?? [];
 
-  final image = media.firstWhere(
-    (m) => m['type'] == 'image',
-    orElse: () => null,
-  );
+    final image = media.firstWhere(
+      (m) => m['type'] == 'image',
+      orElse: () => null,
+    );
 
-  return image != null ? image['url'] : null;
-}
+    return image != null ? image['url'] : null;
+  }
+
   Future<void> _loadDashboard() async {
     final latest = await JournalServices.getLatestJournal();
     final insight = await JournalServices.getDailyInsight();
@@ -96,6 +109,18 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  String getGreetingKey() {
+    final hour = DateTime.now().hour;
+
+    if (hour < 12) {
+      return 'good_morning';
+    } else if (hour > 15) {
+      return 'good_afternoon';
+    } else {
+      return 'good_evening';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
@@ -128,6 +153,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey.shade300,
+                          image:
+                              user?.picture != null && user!.picture!.isNotEmpty
+                                  ? DecorationImage(
+                                      image: NetworkImage(user!.picture!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.white,
@@ -136,6 +168,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           ],
                         ),
+                        child: user?.picture == null || user!.picture!.isEmpty
+                            ? const Icon(Icons.person)
+                            : null,
                       ),
                       const SizedBox(width: 15),
                       Column(
@@ -143,12 +178,12 @@ class _DashboardPageState extends State<DashboardPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            t['good_morning']!,
+                            t[getGreetingKey()]!,
                             style: GoogleFonts.poppins(
                                 fontSize: 16, color: Colors.grey),
                           ),
                           Text(
-                            "User",
+                            user?.name ?? "User",
                             style: GoogleFonts.poppins(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
