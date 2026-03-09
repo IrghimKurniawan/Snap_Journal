@@ -1,4 +1,3 @@
-// lib/pages/journal.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -42,10 +41,12 @@ class _JournalPageState extends State<JournalPage> {
 
   Future<void> _toggleFavorite(int index) async {
     final journal = _journals[index];
-    final success = await JournalServices.toggleFavorite(journal['id']);
+    final newValue = !(journal['is_favorite'] ?? false);
+    final success =
+        await JournalServices.toggleFavorite(journal['id'], newValue);
     if (success) {
       setState(() {
-        _journals[index]['is_favorite'] = !(journal['is_favorite'] ?? false);
+        _journals[index]['is_favorite'] = newValue;
       });
     }
   }
