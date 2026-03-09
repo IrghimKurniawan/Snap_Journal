@@ -8,7 +8,8 @@ import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/journal.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
-import 'package:snap_journal/package/caldendar_realtime.dart';
+import 'package:snap_journal/package/calendar_realtime.dart';
+import 'package:snap_journal/services/feeling_services.dart';
 
 class InsightPage extends StatefulWidget {
   const InsightPage({super.key});
@@ -17,6 +18,53 @@ class InsightPage extends StatefulWidget {
 }
 
 class _InsightPageState extends State<InsightPage> {
+  String? _topMood;
+  String? _topEmoji;
+  bool _isLoading = true;
+
+  static const Map<String, String> moodEmoji = {
+    'Happy': '😍',
+    'Calm': '😄',
+    'Sad': '😢',
+    'Tired': '😴',
+    'Angry': '😠',
+    'Neutral': '🙂',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTopMood();
+  }
+
+  Future<void> _loadTopMood() async {
+    final history = await FeelingServices.getFeelingHistory();
+
+    if (history.isEmpty) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    // Hitung mood yang paling sering muncul
+    final Map<String, int> moodCount = {};
+    for (final item in history) {
+      final mood = item['mood'] as String?;
+      if (mood != null) {
+        moodCount[mood] = (moodCount[mood] ?? 0) + 1;
+      }
+    }
+
+    // Ambil mood dengan count terbanyak
+    final topMood =
+        moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+
+    setState(() {
+      _topMood = topMood;
+      _topEmoji = moodEmoji[topMood];
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
@@ -32,7 +80,7 @@ class _InsightPageState extends State<InsightPage> {
           style: GoogleFonts.poppins(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF9B7EBD),
+            color: const Color(0xFF9B7EBD),
           ),
         ),
         actions: [
@@ -49,13 +97,14 @@ class _InsightPageState extends State<InsightPage> {
                 height: 45,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF9B7EBD).withOpacity(0.15),
+                  color: const Color(0xFF9B7EBD).withOpacity(0.15),
                 ),
-                child: Icon(Icons.share_outlined, color: Color(0xFF7B5FA7)),
+                child:
+                    const Icon(Icons.share_outlined, color: Color(0xFF7B5FA7)),
               ),
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
@@ -65,27 +114,31 @@ class _InsightPageState extends State<InsightPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RealTimeCalendar(),
-                SizedBox(height: 15),
+                // ─── CALENDAR ───
+                const RealTimeCalendar(),
+                const SizedBox(height: 15),
+
                 Text(
                   t['monthly_summary']!,
                   style: GoogleFonts.poppins(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF9B7EBD),
+                    color: const Color(0xFF9B7EBD),
                   ),
                 ),
-                SizedBox(height: 10),
-                Container(
-                  padding: EdgeInsets.all(20),
-                  width: double.infinity,
+                const SizedBox(height: 10),
+
+                // ─── TOP MOOD & JOURNAL ENTRIES ───
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
                   child: Row(
                     children: [
+                      // TOP MOOD
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Color(0xFF9B7EBD),
+                            color: const Color(0xFF9B7EBD),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
@@ -95,28 +148,52 @@ class _InsightPageState extends State<InsightPage> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFF5F0FF),
+                                  color: const Color(0xFFF5F0FF),
                                 ),
                               ),
-                              SizedBox(height: 8),
-                              Text(
-                                t['mood_happy']!,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFF5F0FF),
-                                ),
-                              ),
+                              const SizedBox(height: 8),
+                              _isLoading
+                                  ? const CircularProgressIndicator(
+                                      color: Colors.white)
+                                  : _topMood == null
+                                      ? Text(
+                                          "—",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFFF5F0FF),
+                                          ),
+                                        )
+                                      : Column(
+                                          children: [
+                                            Text(
+                                              _topEmoji ?? '',
+                                              style:
+                                                  const TextStyle(fontSize: 30),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              _topMood!,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color(0xFFF5F0FF),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(width: 12),
+                      const SizedBox(width: 12),
+
+                      // JOURNAL ENTRIES
                       Expanded(
                         child: Container(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
-                            color: Color(0xFF9B7EBD),
+                            color: const Color(0xFF9B7EBD),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Column(
@@ -126,16 +203,16 @@ class _InsightPageState extends State<InsightPage> {
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFF5F0FF),
+                                  color: const Color(0xFFF5F0FF),
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              const SizedBox(height: 8),
                               Text(
                                 "3 + 2",
                                 style: GoogleFonts.poppins(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFFF5F0FF),
+                                  color: const Color(0xFFF5F0FF),
                                 ),
                               ),
                             ],
@@ -145,28 +222,30 @@ class _InsightPageState extends State<InsightPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
+
+                // ─── DAILY INSIGHT ───
                 Container(
                   width: double.infinity,
                   height: 105,
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Color(0xFF9B7EBD),
+                    color: const Color(0xFF9B7EBD),
                   ),
                   child: Row(
                     children: [
                       Container(
                         width: 60,
                         height: 60,
-                        margin: EdgeInsets.all(20),
+                        margin: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
                           color: Colors.white,
                         ),
-                        child: Icon(Icons.help, color: Color(0xFF7B5FA7)),
+                        child: const Icon(Icons.help, color: Color(0xFF7B5FA7)),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,7 +258,7 @@ class _InsightPageState extends State<InsightPage> {
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               t['daily_insight_body']!,
                               style: GoogleFonts.poppins(

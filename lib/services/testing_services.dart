@@ -1,4 +1,4 @@
-import 'dart:convert';
+// lib/services/testing_services.dart
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,15 +10,13 @@ class TestingServices {
     return prefs.getString("token");
   }
 
-  /// POST trigger reminder job (untuk testing notif reminder)
+  /// GET trigger reminder job
   static Future<bool> triggerReminderJob() async {
     final token = await _getToken();
     if (token == null) return false;
 
-    final url = Uri.parse("$baseUrl/api/v1/testing/reminder-job");
-
-    final response = await http.post(
-      url,
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/test/reminder-job"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -28,31 +26,25 @@ class TestingServices {
     print("TRIGGER REMINDER STATUS: ${response.statusCode}");
     print("TRIGGER REMINDER BODY: ${response.body}");
 
-    return response.statusCode == 200 || response.statusCode == 201;
+    return response.statusCode == 200;
   }
 
-  /// GET media testing
-  static Future<Map<String, dynamic>?> testMedia() async {
+  /// GET trigger media cleanup
+  static Future<bool> triggerMediaCleanup() async {
     final token = await _getToken();
-    if (token == null) return null;
-
-    final url = Uri.parse("$baseUrl/api/v1/testing/media");
+    if (token == null) return false;
 
     final response = await http.get(
-      url,
+      Uri.parse("$baseUrl/api/v1/test/media-cleanup"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       },
     );
 
-    print("TEST MEDIA STATUS: ${response.statusCode}");
-    print("TEST MEDIA BODY: ${response.body}");
+    print("MEDIA CLEANUP STATUS: ${response.statusCode}");
+    print("MEDIA CLEANUP BODY: ${response.body}");
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      return null;
-    }
+    return response.statusCode == 200;
   }
 }

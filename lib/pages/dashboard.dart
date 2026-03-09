@@ -1,4 +1,3 @@
-// lib/pages/dashboard.dart
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -7,10 +6,13 @@ import 'package:snap_journal/additional%20pages/daily_insight.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/journal.dart';
+import 'package:snap_journal/pages/journal_detail.dart';
 import 'package:snap_journal/additional%20pages/notification.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 import 'package:snap_journal/services/feeling_services.dart';
+import 'package:snap_journal/services/journal_services.dart';
+import 'package:intl/intl.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -22,8 +24,10 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int selectedIndex = -1;
   bool _isSavingFeeling = false;
+  Map<String, dynamic>? _latestJournal;
+  bool _isLoadingJournal = true;
 
-  // Nilai yang dikirim ke API — huruf kapital sesuai backend
+  // Nilai yang dikirim ke API
   final List<String> _feelingValues = ['Happy', 'Calm', 'Sad', 'Neutral'];
   final List<String> _emojis = ["😍", "😄", "😢", "🙂"];
 
@@ -31,15 +35,24 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _loadTodayFeeling();
+    _loadLatestJournal();
   }
 
   Future<void> _loadTodayFeeling() async {
     final feeling = await FeelingServices.getTodayFeeling();
     if (feeling != null && mounted) {
       final idx = _feelingValues.indexOf(feeling.feeling);
-      if (idx != -1) {
-        setState(() => selectedIndex = idx);
-      }
+      if (idx != -1) setState(() => selectedIndex = idx);
+    }
+  }
+
+  Future<void> _loadLatestJournal() async {
+    final journal = await JournalServices.getLatestJournal();
+    if (mounted) {
+      setState(() {
+        _latestJournal = journal;
+        _isLoadingJournal = false;
+      });
     }
   }
 
@@ -66,6 +79,20 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '';
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      final now = DateTime.now();
+      final diff = now.difference(date).inDays;
+      if (diff == 0) return "Today, ${DateFormat('HH:mm').format(date)}";
+      if (diff == 1) return "Yesterday, ${DateFormat('HH:mm').format(date)}";
+      return DateFormat('MMM d, HH:mm').format(date);
+    } catch (_) {
+      return '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
@@ -75,6 +102,12 @@ class _DashboardPageState extends State<DashboardPage> {
       t['mood_sad']!,
       t['mood_neutral']!,
     ];
+
+    // Ambil image dari latest journal
+    final media = _latestJournal?['media'] as List<dynamic>? ?? [];
+    final imageUrl = media.where((m) => m['type'] == 'image').isNotEmpty
+        ? media.firstWhere((m) => m['type'] == 'image')['url'] as String
+        : null;
 
     return Scaffold(
       extendBody: true,
@@ -164,6 +197,7 @@ class _DashboardPageState extends State<DashboardPage> {
               const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 30),
           child: Column(
             children: [
+              // ─── MOOD SELECTOR ───
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -234,6 +268,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // ─── LATEST MEMORY ───
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -248,96 +284,142 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
               const SizedBox(height: 15),
-              Container(
-                width: 310,
-                height: 220,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.grey.shade300.withOpacity(0.5),
-                ),
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.grey.shade300,
-                      ),
-                    ),
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.photo,
-                                size: 16, color: Colors.white),
-                            const SizedBox(width: 5),
-                            Text(
-                              t['photo']!,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 12),
+
+              _isLoadingJournal
+                  ? const Center(
+                      child:
+                          CircularProgressIndicator(color: Color(0xFF9B7EBD)))
+                  : _latestJournal == null
+                      ? Container(
+                          width: double.infinity,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.grey.shade200,
+                          ),
+                          child: Center(
+                            child: Text(
+                              "Belum ada jurnal",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 14, color: Colors.grey),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF9B7EBD),
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20),
-                            bottomRight: Radius.circular(20),
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => JournalDetailPage(
+                                  journalId: _latestJournal!['id']),
+                            ),
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            height: 220,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              color: Colors.grey.shade300,
+                              image: imageUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(imageUrl),
+                                      fit: BoxFit.cover,
+                                      colorFilter: ColorFilter.mode(
+                                        Colors.black.withOpacity(0.2),
+                                        BlendMode.darken,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            child: Stack(
+                              children: [
+                                // Badge media
+                                if (media.isNotEmpty)
+                                  Positioned(
+                                    top: 10,
+                                    right: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.photo,
+                                              size: 16, color: Colors.white),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            t['photo']!,
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 12),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                // Info jurnal
+                                Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFF9B7EBD),
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(20),
+                                        bottomRight: Radius.circular(20),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          _formatDate(
+                                              _latestJournal!['created_at']),
+                                          style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _latestJournal!['title'] ?? '',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _latestJournal!['note'] ?? '',
+                                          style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Yesterday, 6:30 AM",
-                              style: TextStyle(
-                                  color: Colors.white70, fontSize: 12),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              t['sample_title']!,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              t['sample_body']!,
-                              style: const TextStyle(
-                                  color: Colors.white70, fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+
               const SizedBox(height: 15),
+
+              // ─── DAILY INSIGHT ───
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const DailyInsight()),
                 ),
                 child: Container(
-                  width: 310,
+                  width: double.infinity,
                   height: 105,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
