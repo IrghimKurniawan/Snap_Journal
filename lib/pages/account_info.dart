@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/pages/otp_delete.dart';
+import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/change_email.dart';
 import 'package:snap_journal/additional%20pages/change_password.dart';
@@ -15,6 +17,7 @@ import 'package:snap_journal/services/profile_services.dart';
 
 class AccountInfoPage extends StatefulWidget {
   const AccountInfoPage({super.key});
+
   @override
   State<AccountInfoPage> createState() => _AccountInfoPageState();
 }
@@ -28,12 +31,17 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
   @override
   void initState() {
     super.initState();
+
     nameController = TextEditingController();
     bioController = TextEditingController();
     emailController = TextEditingController();
 
     loadProfile();
   }
+
+  // ================================
+  // LOAD PROFILE
+  // ================================
 
   Future<void> loadProfile() async {
     final user = await ProfileServices.getProfile();
@@ -47,56 +55,79 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
     }
   }
 
-  Widget build(BuildContext context) {
-    final t = Provider.of<LanguageProvider>(context).text;
+  // ================================
+  // SAVE PROFILE
+  // ================================
 
-    void saveChanges() async {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+  void saveChanges() async {
+    final t = Provider.of<LanguageProvider>(context, listen: false).text;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final success = await ProfileServices.updateProfile(
+      name: nameController.text.trim(),
+      bio: bioController.text.trim(),
+    );
+
+    Navigator.of(context, rootNavigator: true).pop();
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t['changes_saved']!)),
       );
-
-      final success = await ProfileServices.updateProfile(
-        name: nameController.text.trim(),
-        bio: bioController.text.trim(),
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Update gagal")),
       );
-
-      Navigator.of(context, rootNavigator: true).pop();
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t['changes_saved']!)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Update gagal")),
-        );
-      }
     }
+  }
 
-    void deleteAccount() {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(t['delete_confirm_title']!),
-          content: Text(t['delete_confirm_body']!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(t['cancel']!),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(t['delete']!, style: TextStyle(color: Colors.red)),
-            ),
-          ],
+  // ================================
+  // DELETE ACCOUNT REQUEST OTP
+  // ================================
+
+  void requestDeleteAccount() async {
+    final result = await AuthServices.requestDeleteAccount();
+
+    if (result['success'] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DeleteAccountOtp(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? "Failed request OTP"),
         ),
       );
     }
+  }
+
+  void deleteAccount() async {
+    final result = await AuthServices.requestDeleteAccount();
+
+    print(result); // debug
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const DeleteAccountOtp(),
+      ),
+    );
+    }
+  @override
+  Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0FF),
+
       appBar: AppBar(
         elevation: 0,
         backgroundColor: const Color(0xFFF5F0FF),
@@ -112,18 +143,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
             color: const Color(0xFF9B7EBD),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF9B7EBD)),
-            onPressed: () {},
-          ),
-        ],
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+              /// PROFILE IMAGE
               Center(
                 child: Stack(
                   children: [
@@ -139,28 +166,28 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF9B7EBD),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 16,
-                          ),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF9B7EBD),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                          size: 16,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
+
               const SizedBox(height: 24),
+
+              /// FORM CARD
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -187,13 +214,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ChangeEmail(),
+                            builder: (context) => ChangeEmail(
+                              currentEmail: emailController.text,
+                            ),
                           ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: Center(
-                            widthFactor: 1,
                             child: Text(
                               t['change_gmail']!,
                               style: GoogleFonts.poppins(
@@ -223,7 +251,6 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: Center(
-                            widthFactor: 1,
                             child: Text(
                               t['change_password']!,
                               style: GoogleFonts.poppins(
@@ -239,7 +266,10 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              /// SAVE BUTTON
               GestureDetector(
                 onTap: saveChanges,
                 child: Container(
@@ -261,7 +291,10 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 12),
+
+              /// DELETE BUTTON
               GestureDetector(
                 onTap: deleteAccount,
                 child: Container(
@@ -284,11 +317,12 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
+
+      /// BOTTOM NAVBAR
       bottomNavigationBar: CustomBottomNavbar(
         onHomeTap: () => Navigator.push(
           context,
@@ -313,6 +347,10 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
       ),
     );
   }
+
+  // ================================
+  // WIDGET HELPER
+  // ================================
 
   Widget _label(String text) => Text(
         text,

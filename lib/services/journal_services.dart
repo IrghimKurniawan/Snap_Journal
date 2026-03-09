@@ -259,4 +259,104 @@ class JournalServices {
       return false;
     }
   }
+
+  static Future<Map<String, dynamic>?> getLatestJournal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/journals/latest"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> getDailyInsight() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/journals/daily-insight"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> getTopMood() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/journals/top-mood"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> getPeriodicInsight() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/journals/periodic-insight"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return null;
+  }
+
+  static Future<List<dynamic>> getMoodCalendar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/v1/journals/mood-calendar"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return [];
+  }
 }

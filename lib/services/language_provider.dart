@@ -285,7 +285,6 @@ class LanguageProvider extends ChangeNotifier {
     'new_email': 'Email Baru',
     'new_email_hint': 'Masukkan email baru',
     'otp': 'OTP',
-    'confirm_password': 'Konfirmasi Kata Sandi',
 
     // CHANGE PASSWORD
     'change_password_title': 'Ganti Kata Sandi',

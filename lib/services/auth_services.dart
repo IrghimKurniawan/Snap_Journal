@@ -200,6 +200,28 @@ class AuthServices {
     }
   }
 
+  static Future<Map<String, dynamic>> verifyChangeEmail(
+    String newEmail,
+    String otp,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/user/email/change-verify"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "new_email": newEmail,
+        "otp": otp,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
+
   static Future<Map<String, dynamic>> changeEmail(String newEmail) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -211,7 +233,7 @@ class AuthServices {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "newEmail": newEmail,
+        "new_email": newEmail,
       }),
     );
 
@@ -240,5 +262,53 @@ class AuthServices {
     );
 
     return jsonDecode(response.body);
+  }
+
+// request OTP delete account
+  static Future<Map<String, dynamic>> requestDeleteAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/user/delete-request"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    return jsonDecode(response.body);
+  }
+
+// delete account dengan OTP
+  static Future<Map<String, dynamic>> deleteAccount(String otp) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl/api/v1/user/delete"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "otp": otp,
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return {
+        "success": true,
+        "message": "Account deleted",
+      };
+    } else {
+      return {
+        "success": false,
+        "message": "OTP salah",
+      };
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/services/journal_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/share.dart';
 import 'package:snap_journal/package/navigationbar.dart';
@@ -17,7 +18,30 @@ class InsightPage extends StatefulWidget {
 }
 
 class _InsightPageState extends State<InsightPage> {
+  Map<String, dynamic>? _topMood;
+  Map<String, dynamic>? _periodicInsight;
+  List<dynamic> _moodCalendar = [];
+
+  bool _loading = true;
   @override
+  void initState() {
+    super.initState();
+    _loadInsight();
+  }
+
+  Future<void> _loadInsight() async {
+    final topMood = await JournalServices.getTopMood();
+    final periodic = await JournalServices.getPeriodicInsight();
+    final calendar = await JournalServices.getMoodCalendar();
+
+    setState(() {
+      _topMood = topMood;
+      _periodicInsight = periodic;
+      _moodCalendar = calendar;
+      _loading = false;
+    });
+  }
+
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
 
@@ -65,7 +89,9 @@ class _InsightPageState extends State<InsightPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RealTimeCalendar(),
+                RealTimeCalendar(
+                  moods: _moodCalendar,
+                ),
                 SizedBox(height: 15),
                 Text(
                   t['monthly_summary']!,
@@ -91,7 +117,7 @@ class _InsightPageState extends State<InsightPage> {
                           child: Column(
                             children: [
                               Text(
-                                t['top_mood']!,
+                                _topMood?['mood'] ?? t['mood_happy']!,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -131,7 +157,7 @@ class _InsightPageState extends State<InsightPage> {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                "3 + 2",
+                                "${_topMood?['total_entries'] ?? 0}",
                                 style: GoogleFonts.poppins(
                                   fontSize: 25,
                                   fontWeight: FontWeight.bold,
@@ -172,7 +198,7 @@ class _InsightPageState extends State<InsightPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              t['daily_insight']!,
+                              _periodicInsight?['title'] ?? t['daily_insight']!,
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -181,7 +207,8 @@ class _InsightPageState extends State<InsightPage> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              t['daily_insight_body']!,
+                              _periodicInsight?['content'] ??
+                                  t['daily_insight_body']!,
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Colors.white70,

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/services/journal_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 import 'package:snap_journal/additional%20pages/daily_insight.dart';
 import 'package:snap_journal/package/navigationbar.dart';
@@ -20,6 +21,10 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  Map<String, dynamic>? _latestJournal;
+  Map<String, dynamic>? _dailyInsight;
+  bool _loading = true;
+
   int selectedIndex = -1;
   bool _isSavingFeeling = false;
 
@@ -31,6 +36,31 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _loadTodayFeeling();
+    _loadDashboard();
+  }
+
+
+  String? _getImageUrl() {
+  if (_latestJournal == null) return null;
+
+  final media = _latestJournal!['media'] as List<dynamic>? ?? [];
+
+  final image = media.firstWhere(
+    (m) => m['type'] == 'image',
+    orElse: () => null,
+  );
+
+  return image != null ? image['url'] : null;
+}
+  Future<void> _loadDashboard() async {
+    final latest = await JournalServices.getLatestJournal();
+    final insight = await JournalServices.getDailyInsight();
+
+    setState(() {
+      _latestJournal = latest;
+      _dailyInsight = insight;
+      _loading = false;
+    });
   }
 
   Future<void> _loadTodayFeeling() async {
@@ -249,8 +279,8 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               const SizedBox(height: 15),
               Container(
-                width: 310,
-                height: 220,
+                width: double.infinity,
+                height: 250,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: Colors.grey.shade300.withOpacity(0.5),
@@ -261,6 +291,16 @@ class _DashboardPageState extends State<DashboardPage> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.grey.shade300,
+                        image: _getImageUrl() != null
+                            ? DecorationImage(
+                                image: NetworkImage(_getImageUrl()!),
+                                fit: BoxFit.cover,
+                                colorFilter: ColorFilter.mode(
+                                  Colors.black.withOpacity(0.25),
+                                  BlendMode.darken,
+                                ),
+                              )
+                            : null,
                       ),
                     ),
                     Positioned(
@@ -275,8 +315,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.photo,
-                                size: 16, color: Colors.white),
+                            Icon(
+                              _getImageUrl() != null
+                                  ? Icons.photo
+                                  : Icons.notes,
+                              size: 16,
+                              color: Colors.white,
+                            ),
                             const SizedBox(width: 5),
                             Text(
                               t['photo']!,
@@ -303,14 +348,14 @@ class _DashboardPageState extends State<DashboardPage> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              "Yesterday, 6:30 AM",
-                              style: TextStyle(
+                            Text(
+                              _latestJournal?['created_at'] ?? '',
+                              style: const TextStyle(
                                   color: Colors.white70, fontSize: 12),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              t['sample_title']!,
+                              _latestJournal?['title'] ?? '',
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -319,7 +364,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              t['sample_body']!,
+                              _latestJournal?['note'] ?? '',
                               style: const TextStyle(
                                   color: Colors.white70, fontSize: 12),
                             ),
@@ -337,9 +382,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   MaterialPageRoute(builder: (context) => const DailyInsight()),
                 ),
                 child: Container(
-                  width: 310,
-                  height: 105,
-                  padding: const EdgeInsets.all(12),
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     color: const Color(0xFF9B7EBD),
@@ -362,7 +406,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              t['daily_insight']!,
+                              _dailyInsight?['title'] ?? 'Daily Insight',
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -371,7 +415,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              t['daily_insight_body']!,
+                              _dailyInsight?['content'] ?? '',
                               style: GoogleFonts.poppins(
                                   fontSize: 12, color: Colors.white70),
                               maxLines: 3,

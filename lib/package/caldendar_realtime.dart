@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class RealTimeCalendar extends StatefulWidget {
-  const RealTimeCalendar({super.key});
+  final List<dynamic> moods;
+
+  const RealTimeCalendar({
+    super.key,
+    required this.moods,
+  });
 
   @override
   State<RealTimeCalendar> createState() => _RealTimeCalendarState();
@@ -29,15 +34,47 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
     });
   }
 
+  /// ===== FIND MOOD FROM API =====
+  Map<String, dynamic>? _getMoodForDate(DateTime date) {
+    try {
+      return widget.moods.firstWhere((mood) {
+        final moodDate = DateTime.parse(mood['date']);
+
+        return moodDate.year == date.year &&
+            moodDate.month == date.month &&
+            moodDate.day == date.day;
+      });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// ===== MOOD COLOR =====
+  Color? _getMoodColor(String mood) {
+    switch (mood) {
+      case "happy":
+        return Colors.green;
+
+      case "sad":
+        return Colors.blue;
+
+      case "angry":
+        return Colors.red;
+
+      case "neutral":
+        return Colors.orange;
+
+      default:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     DateTime firstDay = DateTime(selectedDate.year, selectedDate.month, 1);
 
-    int daysInMonth = DateTime(
-      selectedDate.year,
-      selectedDate.month + 1,
-      0,
-    ).day;
+    int daysInMonth =
+        DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
 
     int startWeekday = firstDay.weekday % 7;
 
@@ -63,7 +100,6 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                 ),
                 onPressed: () => _changeMonth(-1),
               ),
-
               Row(
                 children: [
                   /// MONTH DROPDOWN
@@ -71,12 +107,12 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                     height: 40,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white, // background putih
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: DropdownButton<int>(
                       value: selectedDate.month,
-                      dropdownColor: Colors.white, // menu dropdown putih juga
+                      dropdownColor: Colors.white,
                       underline: const SizedBox(),
                       iconEnabledColor: const Color(0xFF9B7EBD),
                       style: const TextStyle(
@@ -99,14 +135,15 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                     ),
                   ),
 
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
                   /// YEAR DROPDOWN
                   Container(
                     height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white, // background tombol putih
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: DropdownButton<int>(
@@ -135,7 +172,6 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                   ),
                 ],
               ),
-
               IconButton(
                 icon: const Icon(
                   Icons.arrow_forward_ios,
@@ -182,15 +218,22 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
 
               int day = index - startWeekday + 1;
 
-              bool isToday =
-                  day == DateTime.now().day &&
-                  selectedDate.month == DateTime.now().month &&
-                  selectedDate.year == DateTime.now().year;
+              DateTime currentDate =
+                  DateTime(selectedDate.year, selectedDate.month, day);
+
+
+              final moodData = _getMoodForDate(currentDate);
+
+              Color? moodColor;
+
+              if (moodData != null) {
+                moodColor = _getMoodColor(moodData['mood']);
+              }
 
               return Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: isToday ? Colors.red : null,
+                  color: moodColor ?? Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -211,6 +254,7 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
 
 class _DayLabel extends StatelessWidget {
   final String text;
+
   const _DayLabel(this.text);
 
   @override
