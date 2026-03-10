@@ -1,3 +1,4 @@
+// lib/services/journal_services.dart
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -63,6 +64,30 @@ class JournalServices {
     } catch (e) {
       print("CREATE JOURNAL ERROR: $e");
       return false;
+    }
+  }
+
+  /// GET journal terbaru
+  static Future<Map<String, dynamic>?> getLatestJournal() async {
+    final token = await _getToken();
+    if (token == null) return null;
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/api/v1/journals/latest"),
+        headers: {"Authorization": "Bearer $token"},
+      ).timeout(const Duration(seconds: 30));
+
+      print("GET LATEST JOURNAL STATUS: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return body['data'];
+      }
+      return null;
+    } catch (e) {
+      print("GET LATEST JOURNAL ERROR: $e");
+      return null;
     }
   }
 
@@ -258,26 +283,6 @@ class JournalServices {
       print("TOGGLE FAVORITE ERROR: $e");
       return false;
     }
-  }
-
-  static Future<Map<String, dynamic>?> getLatestJournal() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-
-    final response = await http.get(
-      Uri.parse("$baseUrl/api/v1/journals/latest"),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['data'];
-    }
-
-    return null;
   }
 
   static Future<Map<String, dynamic>?> getDailyInsight() async {

@@ -1,3 +1,4 @@
+// lib/services/feeling_services.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,7 @@ class FeelingServices {
   }
 
   /// POST simpan perasaan hari ini
+  /// feeling: 'Happy' | 'Calm' | 'Sad' | 'Tired' | 'Angry'
   static Future<bool> saveFeeling(String feeling) async {
     final token = await _getToken();
     if (token == null) return false;
@@ -25,7 +27,7 @@ class FeelingServices {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "mood": feeling,
+        "mood": feeling, // backend pakai "mood"
       }),
     );
 
@@ -60,6 +62,36 @@ class FeelingServices {
       return FeelingModel.fromJson(data);
     } else {
       return null;
+    }
+  }
+
+  /// GET riwayat perasaan 30 hari terakhir
+  static Future<List<dynamic>> getFeelingHistory() async {
+    final token = await _getToken();
+    if (token == null) return [];
+
+    final url = Uri.parse("$baseUrl/api/v1/feelings/history");
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print("GET FEELING HISTORY STATUS: ${response.statusCode}");
+      print("GET FEELING HISTORY BODY: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        return body['data'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      print("GET FEELING HISTORY ERROR: $e");
+      return [];
     }
   }
 }

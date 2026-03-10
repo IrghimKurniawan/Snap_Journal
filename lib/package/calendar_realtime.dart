@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:snap_journal/services/feeling_services.dart';
 
 class RealTimeCalendar extends StatefulWidget {
   final List<dynamic> moods;
@@ -15,6 +16,36 @@ class RealTimeCalendar extends StatefulWidget {
 
 class _RealTimeCalendarState extends State<RealTimeCalendar> {
   DateTime selectedDate = DateTime.now();
+  Map<String, String> _moodByDate = {}; // key: "yyyy-MM-dd", value: mood string
+
+  // Mapping mood → emoji (sama seperti di dashboard)
+  static const Map<String, String> moodEmoji = {
+    'Happy': '😍',
+    'Calm': '😄',
+    'Sad': '😢',
+    'Tired': '😴',
+    'Angry': '😠',
+    'Neutral': '🙂',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final history = await FeelingServices.getFeelingHistory();
+    final Map<String, String> mapped = {};
+    for (final item in history) {
+      final date = item['date'] as String?;
+      final mood = item['mood'] as String?;
+      if (date != null && mood != null) {
+        mapped[date] = mood;
+      }
+    }
+    setState(() => _moodByDate = mapped);
+  }
 
   void _changeMonth(int value) {
     setState(() {
@@ -77,7 +108,6 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
         DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
 
     int startWeekday = firstDay.weekday % 7;
-
     int totalItems = startWeekday + daysInMonth;
 
     return Container(
@@ -88,21 +118,18 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
       ),
       child: Column(
         children: [
-          /// ===== HEADER =====
+          // ===== HEADER =====
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_back_ios,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                icon: const Icon(Icons.arrow_back_ios,
+                    color: Colors.white, size: 18),
                 onPressed: () => _changeMonth(-1),
               ),
               Row(
                 children: [
-                  /// MONTH DROPDOWN
+                  // MONTH DROPDOWN
                   Container(
                     height: 40,
                     padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -128,14 +155,12 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                         );
                       }),
                       onChanged: (value) {
-                        if (value != null) {
-                          _selectMonth(value);
-                        }
+                        if (value != null) _selectMonth(value);
                       },
                     ),
                   ),
 
-                  const SizedBox(width: 10),
+                  SizedBox(width: 10),
 
                   /// YEAR DROPDOWN
                   Container(
@@ -164,20 +189,15 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                         );
                       }),
                       onChanged: (value) {
-                        if (value != null) {
-                          _selectYear(value);
-                        }
+                        if (value != null) _selectYear(value);
                       },
                     ),
                   ),
                 ],
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                icon: const Icon(Icons.arrow_forward_ios,
+                    color: Colors.white, size: 18),
                 onPressed: () => _changeMonth(1),
               ),
             ],
@@ -185,7 +205,7 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
 
           const SizedBox(height: 20),
 
-          /// ===== DAY LABEL =====
+          // ===== DAY LABEL =====
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
@@ -201,7 +221,7 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
 
           const SizedBox(height: 16),
 
-          /// ===== GRID =====
+          // ===== GRID =====
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -209,26 +229,24 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 7,
               mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
+              crossAxisSpacing: 4,
             ),
             itemBuilder: (context, index) {
-              if (index < startWeekday) {
-                return const SizedBox();
-              }
+              if (index < startWeekday) return const SizedBox();
 
               int day = index - startWeekday + 1;
 
-              DateTime currentDate =
-                  DateTime(selectedDate.year, selectedDate.month, day);
+              bool isToday =
+                  day == DateTime.now().day &&
+                  selectedDate.month == DateTime.now().month &&
+                  selectedDate.year == DateTime.now().year;
 
-
-              final moodData = _getMoodForDate(currentDate);
-
-              Color? moodColor;
-
-              if (moodData != null) {
-                moodColor = _getMoodColor(moodData['mood']);
-              }
+              // Cek apakah tanggal ini ada mood-nya
+              final dateKey = DateFormat('yyyy-MM-dd').format(
+                DateTime(selectedDate.year, selectedDate.month, day),
+              );
+              final mood = _moodByDate[dateKey];
+              final emoji = mood != null ? moodEmoji[mood] : null;
 
               return Container(
                 alignment: Alignment.center,
@@ -236,13 +254,28 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                   color: moodColor ?? Colors.transparent,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Text(
-                  "$day",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: emoji != null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(emoji, style: const TextStyle(fontSize: 14)),
+                          Text(
+                            "$day",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Text(
+                        "$day",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               );
             },
           ),
