@@ -160,7 +160,7 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
                     ),
                   ),
 
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
                   /// YEAR DROPDOWN
                   Container(
@@ -236,10 +236,17 @@ class _RealTimeCalendarState extends State<RealTimeCalendar> {
 
               int day = index - startWeekday + 1;
 
-              bool isToday =
-                  day == DateTime.now().day &&
-                  selectedDate.month == DateTime.now().month &&
-                  selectedDate.year == DateTime.now().year;
+              DateTime currentDate =
+                  DateTime(selectedDate.year, selectedDate.month, day);
+
+
+              final moodData = _getMoodForDate(currentDate);
+
+              Color? moodColor;
+
+              if (moodData != null) {
+                moodColor = _getMoodColor(moodData['mood']);
+              }
 
               // Cek apakah tanggal ini ada mood-nya
               final dateKey = DateFormat('yyyy-MM-dd').format(

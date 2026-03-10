@@ -365,22 +365,25 @@ class JournalServices {
     return [];
   }
 
-  static Future<Map<String, dynamic>> searchJournal(String keyword) async {
+  static Future<List<dynamic>> searchJournal(String keyword) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
     final response = await http.get(
       Uri.parse("$baseUrl/api/v1/journals/search?keyword=$keyword"),
       headers: {
-        "Content-Type": "application/json",
         "Authorization": "Bearer $token",
-        "Language": "id"
+        "Language": "id",
+        "Content-Type": "application/json",
       },
     );
 
-    print("STATUS SEARCH: ${response.statusCode}");
-    print("BODY SEARCH: ${response.body}");
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
 
-    return jsonDecode(response.body);
+      return data['data'];
+    }
+
+    return [];
   }
 }

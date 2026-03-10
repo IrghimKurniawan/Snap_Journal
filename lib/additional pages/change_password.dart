@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snap_journal/auth/login.dart';
 import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 
@@ -108,13 +110,24 @@ class _ChangePasswordState extends State<ChangePassword> {
                       confirmPassword,
                     );
 
-                    if (res['success'] == true) {
+                    if (res['data'] != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                             content: Text("Password successfully changed")),
                       );
 
                       Navigator.pop(context);
+                    } else if (res['errors'] != null &&
+                        res['errors'].toString().contains("Unauthorized")) {
+                      // token sudah tidak valid → logout
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false,
+                      );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

@@ -274,6 +274,35 @@ class _JournalPageState extends State<JournalPage> {
                                       // Tombol favorit
                                       Positioned(
                                         top: 8,
+                                        left: 8,
+                                        child: PopupMenuButton<String>(
+                                          icon: const Icon(Icons.more_vert,
+                                              color: Colors.white),
+                                          onSelected: (value) {
+                                            if (value == "delete") {
+                                              _deleteJournal(
+                                                  journal['id'].toString());
+                                            }
+                                          },
+                                          itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: "delete",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.delete,
+                                                      color: Colors.red),
+                                                  SizedBox(width: 8),
+                                                  Text("Hapus"),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      /// FAVORITE BUTTON
+                                      Positioned(
+                                        top: 8,
                                         right: 8,
                                         child: GestureDetector(
                                           onTap: () => _toggleFavorite(index),
@@ -288,7 +317,7 @@ class _JournalPageState extends State<JournalPage> {
                                               isFavorite
                                                   ? Icons.favorite
                                                   : Icons.favorite_border,
-                                              color: isFavorite
+                                                color: isFavorite
                                                   ? Colors.red
                                                   : Colors.white,
                                               size: 18,

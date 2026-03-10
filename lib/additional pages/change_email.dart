@@ -157,11 +157,10 @@ class _ChangeEmailState extends State<ChangeEmail> {
                   }
 
                   final res = await AuthServices.verifyChangeEmail(
-                    newEmail,
                     otp,
                   );
 
-                  if (res['success'] == true) {
+                  if (res['data'] != null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text("Email berhasil diganti"),

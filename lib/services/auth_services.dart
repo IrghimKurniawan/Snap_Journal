@@ -101,8 +101,6 @@ class AuthServices {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
 
-    if (token == null) return false;
-
     final url = Uri.parse(
       "https://api-znp6gyu5hq-et.a.run.app/api/v1/auth/logout",
     );
@@ -118,12 +116,13 @@ class AuthServices {
     print("LOGOUT STATUS: ${response.statusCode}");
     print("LOGOUT BODY: ${response.body}");
 
-    if (response.statusCode == 200) {
-      await prefs.clear(); // hapus token lokal
+    // kalau sukses ATAU token sudah tidak valid
+    if (response.statusCode == 200 || response.statusCode == 401) {
+      await prefs.remove("token");
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   }
 
   static Future<ForgotPasswordResponse> forgotPassword(String email) async {
@@ -201,7 +200,6 @@ class AuthServices {
   }
 
   static Future<Map<String, dynamic>> verifyChangeEmail(
-    String newEmail,
     String otp,
   ) async {
     final prefs = await SharedPreferences.getInstance();
@@ -214,10 +212,12 @@ class AuthServices {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "new_email": newEmail,
         "otp": otp,
       }),
     );
+
+    print("VERIFY STATUS: ${response.statusCode}");
+    print("VERIFY BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
@@ -233,9 +233,12 @@ class AuthServices {
         "Authorization": "Bearer $token",
       },
       body: jsonEncode({
-        "new_email": newEmail,
+        "newEmail": newEmail,
       }),
     );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
@@ -248,7 +251,7 @@ class AuthServices {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
 
-    final response = await http.post(
+    final response = await http.put(
       Uri.parse("$baseUrl/api/v1/user/password"),
       headers: {
         "Content-Type": "application/json",
@@ -260,6 +263,9 @@ class AuthServices {
         "confirmPassword": confirmPassword,
       }),
     );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
 
     return jsonDecode(response.body);
   }
