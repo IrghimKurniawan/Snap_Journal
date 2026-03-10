@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snap_journal/services/journal_services.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,7 +10,24 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  TextEditingController searchController = TextEditingController();
+
+  List journals = [];
+  bool isLoading = false;
   @override
+  Future<void> searchJournal() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final response = await JournalServices.searchJournal(searchController.text);
+
+    setState(() {
+      journals = response['data']['journals'] ?? [];
+      isLoading = false;
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF9B7EBD),
@@ -54,18 +72,22 @@ class _SearchPageState extends State<SearchPage> {
                         children: [
                           Expanded(
                             child: TextField(
+                              controller: searchController,
+                              onSubmitted: (value) {
+                                searchJournal();
+                              },
                               decoration: InputDecoration(
                                 hintText: "Search Journal...",
-                                hintStyle: GoogleFonts.poppins(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                ),
                                 border: InputBorder.none,
                               ),
                             ),
                           ),
-                          Icon(Icons.search, color: Color(0xFF7B5FA7)),
+                          IconButton(
+                            icon: Icon(Icons.search, color: Color(0xFF7B5FA7)),
+                            onPressed: () {
+                              searchJournal();
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -210,21 +232,45 @@ class _SearchPageState extends State<SearchPage> {
             //     ],
             //   ),
             // ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.search, color: Colors.white54, size: 40),
-                SizedBox(height: 10),
-                Text(
-                  "No More Results",
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.white54,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
+            Expanded(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : journals.isEmpty
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.search, color: Colors.white54, size: 40),
+                            SizedBox(height: 10),
+                            Text(
+                              "No Results",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: journals.length,
+                          itemBuilder: (context, index) {
+                            final journal = journals[index];
+
+                            return Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                journal['title'] ?? '',
+                                style: GoogleFonts.poppins(),
+                              ),
+                            );
+                          },
+                        ),
+            )
           ],
         ),
       ),
