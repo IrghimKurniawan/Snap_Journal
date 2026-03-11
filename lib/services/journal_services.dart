@@ -386,4 +386,73 @@ class JournalServices {
 
     return [];
   }
+
+  static Future<Map<String, dynamic>?> analyzeJournal(String journalId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/journals/$journalId/analyze"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("ANALYZE STATUS: ${response.statusCode}");
+    print("ANALYZE BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    return null;
+  }
+
+  static Future chatJournal(String id, String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/journals/$id/chat"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({"message": message}),
+    );
+
+    print("CHAT JOURNAL STATUS: ${response.statusCode}");
+    print("CHAT JOURNAL BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> enhanceJournal(
+    String text,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/journals/enhance"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "text": text,
+        "instruction": "fix_grammar",
+      }),
+    );
+
+    print("ENHANCE JOURNAL STATUS: ${response.statusCode}");
+    print("ENHANCE JOURNAL BODY: ${response.body}");
+
+    return jsonDecode(response.body);
+  }
 }

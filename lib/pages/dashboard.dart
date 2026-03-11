@@ -414,7 +414,11 @@ class _DashboardPageState extends State<DashboardPage> {
               GestureDetector(
                 onTap: () => Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const DailyInsight()),
+                  MaterialPageRoute(
+                    builder: (_) => DailyInsight(
+                      journalId: _latestJournal!['id'].toString(),
+                    ),
+                  ),
                 ),
                 child: Container(
                   width: double.infinity,
@@ -450,7 +454,9 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _dailyInsight?['content'] ?? '',
+                              (_dailyInsight?['chatbot_highlight'] ??
+                                      "Belum ada insight")
+                                  .toString(),
                               style: GoogleFonts.poppins(
                                   fontSize: 12, color: Colors.white70),
                               maxLines: 3,
