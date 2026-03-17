@@ -2,32 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class Themes extends StatefulWidget {
   const Themes({super.key});
+
   @override
   State<Themes> createState() => _ThemesState();
 }
 
 class _ThemesState extends State<Themes> {
+  Color? selectedColor;
+
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    selectedColor ??= themeProvider.primaryColor;
 
     return Scaffold(
-      backgroundColor: Color(0xFFF5F0FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           t['themes_title']!,
           style: GoogleFonts.poppins(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF9B7EBD),
+            color: themeProvider.primaryColor,
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Color(0xFF9B7EBD)),
+          icon: Icon(Icons.arrow_back_ios, color: themeProvider.primaryColor),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -41,15 +48,15 @@ class _ThemesState extends State<Themes> {
                 t['appearance_label']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
-                  color: Color(0xFF9B7EBD),
+                  color: themeProvider.primaryColor,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Color(0xFF9B7EBD),
+                  color: themeProvider.primaryColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Row(
@@ -57,13 +64,13 @@ class _ThemesState extends State<Themes> {
                     Container(
                       width: 45,
                       height: 45,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.dark_mode, color: Color(0xFF7B5FA7)),
+                      child: const Icon(Icons.dark_mode),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Text(
                       t['dark_mode']!,
                       style: GoogleFonts.poppins(
@@ -72,184 +79,86 @@ class _ThemesState extends State<Themes> {
                         color: Colors.white,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     ToggleSwitch(
-                      minWidth: 60.0,
-                      cornerRadius: 20.0,
-                      activeBgColors: [
-                        [Color(0xFF9B7EBD)],
-                        [Color(0xFF9B7EBD)],
-                      ],
-                      activeFgColor: Colors.white,
-                      inactiveBgColor: Color(0xFF9B7EBD),
-                      inactiveFgColor: Colors.white,
-                      initialLabelIndex: 1,
+                      minWidth: 60,
+                      cornerRadius: 20,
+                      initialLabelIndex: themeProvider.isDark ? 1 : 0,
                       totalSwitches: 2,
-                      labels: ['', ''],
-                      radiusStyle: true,
-                      onToggle: (index) {},
+                      labels: const ['Light', 'Dark'],
+                      onToggle: (index) {
+                        themeProvider.toggleDark(index == 1);
+                      },
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 20),
               Text(
                 t['color_themes']!,
                 style: GoogleFonts.poppins(
                   fontSize: 16,
-                  color: Color(0xFF9B7EBD),
+                  color: themeProvider.primaryColor,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Color(0xFF9B7EBD),
+                  color: themeProvider.primaryColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
                       children: [
-                        _colorCircle(Color(0xFF9B7EBD), border: true),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFF121212)),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFFE5E5E5)),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFFCFCFCF)),
+                        _colorCircle(const Color(0xFF9B7EBD)),
+                        _colorCircle(const Color(0xFF34C759)),
+                        _colorCircle(const Color(0xFF008080)),
+                        _colorCircle(const Color(0xFFFFC0CB)),
+                        _colorCircle(const Color(0xFF4B0082)),
+                        _colorCircle(const Color(0xFFEC221F)),
+                        _colorCircle(const Color(0xFF000000)),
+                        _colorCircle(const Color(0xFF0000FF)),
                       ],
                     ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          ['Default', 'Midnight', 'Light Gray', 'Soft Silver']
-                              .map(
-                                (s) => Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                  child: Text(
-                                    s,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 30),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    if (selectedColor != null) {
+                      themeProvider.changeColor(selectedColor!);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Theme updated"),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 200,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: themeProvider.primaryColor,
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _colorCircle(Color(0xFF34C759)),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFF008080)),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFFFFC0CB)),
-                        SizedBox(width: 10),
-                        _colorCircle(Color(0xFF4B0082)),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: ['Green', 'Teal', 'Pink', 'Indigo']
-                          .map(
-                            (s) => Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8),
-                              child: Text(
-                                s,
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    SizedBox(height: 20),
-                    Divider(color: Colors.white, thickness: 1.5),
-                    SizedBox(height: 10),
-                    Center(
+                    child: Center(
                       child: Text(
-                        t['accent_color']!,
+                        t['save_changes']!,
                         style: GoogleFonts.poppins(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          [
-                                Color(0xFF7B5FA7),
-                                Color(0xFFEC221F),
-                                Color(0xFF000000),
-                                Color(0xFFFFFFFF),
-                                Color(0xFF0000FF),
-                                Colors.white,
-                              ]
-                              .map(
-                                (c) => Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 5),
-                                  child: _colorCircle(
-                                    c,
-                                    small: true,
-                                    border: c == Color(0xFF7B5FA7),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          ['Default', 'Red', 'Black', 'White', 'Blue', 'Custom']
-                              .map(
-                                (s) => Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 3),
-                                  child: Text(
-                                    s,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              Center(
-                child: Container(
-                  width: 200,
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Center(
-                    child: Text(
-                      t['save_changes']!,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -262,15 +171,28 @@ class _ThemesState extends State<Themes> {
     );
   }
 
-  Widget _colorCircle(Color color, {bool border = false, bool small = false}) {
-    double size = small ? 20 : 45;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: border ? Border.all(color: Colors.white, width: 2) : null,
+  Widget _colorCircle(Color color, {bool small = false}) {
+    double size = small ? 25 : 45;
+
+    bool isSelected = selectedColor == color;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedColor = color;
+        });
+      },
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+        ),
+        child: isSelected
+            ? const Icon(Icons.check, color: Colors.white, size: 20)
+            : null,
       ),
     );
   }

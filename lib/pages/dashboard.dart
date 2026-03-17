@@ -454,14 +454,16 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              (_dailyInsight?['chatbot_highlight'] ??
-                                      "Belum ada insight")
-                                  .toString(),
+                              _dailyInsight?['chatbot_highlight'] ??
+                                  _dailyInsight?['content'] ??
+                                  "Belum ada insight",
                               style: GoogleFonts.poppins(
-                                  fontSize: 12, color: Colors.white70),
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
-                            ),
+                            )
                           ],
                         ),
                       ),

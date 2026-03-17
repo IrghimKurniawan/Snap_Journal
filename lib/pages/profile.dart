@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/additional%20pages/notification.dart';
 import 'package:snap_journal/auth/login.dart';
 import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
@@ -137,7 +138,10 @@ class ProfilePage extends StatelessWidget {
                       _menuItem(
                         icon: Icons.notifications_none,
                         label: t['notification']!,
-                        onTap: () => print("Notification"),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => NotificationPage()),
+                        ),
                       ),
                     ],
                   ),
