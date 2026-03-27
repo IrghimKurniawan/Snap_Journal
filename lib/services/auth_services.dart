@@ -101,8 +101,6 @@ class AuthServices {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
 
-    if (token == null) return false;
-
     final url = Uri.parse(
       "https://api-znp6gyu5hq-et.a.run.app/api/v1/auth/logout",
     );
@@ -118,12 +116,13 @@ class AuthServices {
     print("LOGOUT STATUS: ${response.statusCode}");
     print("LOGOUT BODY: ${response.body}");
 
-    if (response.statusCode == 200) {
-      await prefs.clear(); // hapus token lokal
+    // kalau sukses ATAU token sudah tidak valid
+    if (response.statusCode == 200 || response.statusCode == 401) {
+      await prefs.remove("token");
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   }
 
   static Future<ForgotPasswordResponse> forgotPassword(String email) async {
@@ -198,5 +197,129 @@ class AuthServices {
     } else {
       throw Exception(jsonDecode(response.body)['errors'] ?? response.body);
     }
+  }
+
+  static Future<Map<String, dynamic>> verifyChangeEmail(
+    String otp,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/user/email/change-verify"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "otp": otp,
+      }),
+    );
+
+    print("VERIFY STATUS: ${response.statusCode}");
+    print("VERIFY BODY: ${response.body}");
+
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> changeEmail(String newEmail) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/user/email/change-request"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "newEmail": newEmail,
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> changePassword(
+    String oldPassword,
+    String newPassword,
+    String confirmPassword,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/api/v1/user/password"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "oldPassword": oldPassword,
+        "newPassword": newPassword,
+        "confirmPassword": confirmPassword,
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    return jsonDecode(response.body);
+  }
+
+// request OTP delete account
+  static Future<Map<String, dynamic>> requestDeleteAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/api/v1/user/delete-request"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    return jsonDecode(response.body);
+  }
+
+// delete account dengan OTP
+  static Future<Map<String, dynamic>> deleteAccount(String otp) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl/api/v1/user/delete"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "otp": otp,
+      }),
+    );
+
+    print("STATUS CODE: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      return {
+        "success": true,
+        "message": "Account deleted",
+      };
+    } else {
+      return {
+        "success": false,
+        "message": "OTP salah",
+      };
+    }
+  }
+
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
   }
 }

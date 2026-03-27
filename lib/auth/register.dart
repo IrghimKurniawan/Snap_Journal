@@ -141,7 +141,8 @@ class _RegisterPageState extends State<RegisterPage> {
                               // VALIDASI
                               if (name.isEmpty ||
                                   email.isEmpty ||
-                                  password.isEmpty) {
+                                  password.isEmpty ||
+                                  confirmPassword.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text("Semua field wajib diisi")),
@@ -149,6 +150,19 @@ class _RegisterPageState extends State<RegisterPage> {
                                 return;
                               }
 
+// VALIDASI EMAIL
+                              final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+
+                              if (!emailRegex.hasMatch(email)) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Format email tidak valid")),
+                                );
+                                return;
+                              }
+
+// VALIDASI PASSWORD
                               if (password != confirmPassword) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

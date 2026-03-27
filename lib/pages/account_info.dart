@@ -1,10 +1,11 @@
-// ===== account_info.dart =====
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:snap_journal/pages/otp_delete.dart';
+import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
-import 'package:snap_journal/additional%20pages/change_email.dart';
-import 'package:snap_journal/additional%20pages/change_password.dart';
+import 'package:snap_journal/additional pages/change_email.dart';
+import 'package:snap_journal/additional pages/change_password.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/pages/insight.dart';
@@ -13,8 +14,12 @@ import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 import 'package:snap_journal/services/profile_services.dart';
 
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+
 class AccountInfoPage extends StatefulWidget {
   const AccountInfoPage({super.key});
+
   @override
   State<AccountInfoPage> createState() => _AccountInfoPageState();
 }
@@ -23,17 +28,26 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
   late TextEditingController nameController;
   late TextEditingController bioController;
   late TextEditingController emailController;
+
   final passwordController = TextEditingController(text: '**********');
+
+  File? _profileImage;
+  String? profileImageUrl;
 
   @override
   void initState() {
     super.initState();
+
     nameController = TextEditingController();
     bioController = TextEditingController();
     emailController = TextEditingController();
 
     loadProfile();
   }
+
+  /// ===============================
+  /// LOAD PROFILE
+  /// ===============================
 
   Future<void> loadProfile() async {
     final user = await ProfileServices.getProfile();
@@ -43,57 +57,118 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
         nameController.text = user.name;
         bioController.text = user.bio ?? "";
         emailController.text = user.email;
+        profileImageUrl = user.picture;
       });
     }
   }
 
-  Widget build(BuildContext context) {
-    final t = Provider.of<LanguageProvider>(context).text;
+  /// ===============================
+  /// SAVE PROFILE
+  /// ===============================
 
-    void saveChanges() async {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
+  void saveChanges() async {
+    final t = Provider.of<LanguageProvider>(context, listen: false).text;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final success = await ProfileServices.updateProfile(
+      name: nameController.text.trim(),
+      bio: bioController.text.trim(),
+    );
+
+    Navigator.of(context, rootNavigator: true).pop();
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(t['changes_saved']!)),
       );
-
-      final success = await ProfileServices.updateProfile(
-        name: nameController.text.trim(),
-        bio: bioController.text.trim(),
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Update gagal")),
       );
-
-      Navigator.of(context, rootNavigator: true).pop();
-
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t['changes_saved']!)),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Update gagal")),
-        );
-      }
     }
+  }
 
-    void deleteAccount() {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(t['delete_confirm_title']!),
-          content: Text(t['delete_confirm_body']!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(t['cancel']!),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(t['delete']!, style: TextStyle(color: Colors.red)),
-            ),
-          ],
+  /// ===============================
+  /// DELETE ACCOUNT
+  /// ===============================
+
+  void deleteAccount() async {
+    final result = await AuthServices.requestDeleteAccount();
+
+    if (result['success'] == true) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const DeleteAccountOtp(),
         ),
       );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? "Failed request OTP")),
+      );
     }
+  }
+
+  /// ===============================
+  /// PICK IMAGE
+  /// ===============================
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+
+    final pickedFile = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+
+      await _uploadImage(_profileImage!);
+    }
+  }
+
+  /// ===============================
+  /// UPLOAD IMAGE
+  /// ===============================
+
+  Future<void> _uploadImage(File image) async {
+    final success = await ProfileServices.uploadProfilePicture(image);
+
+    if (success) {
+      loadProfile();
+    }
+  }
+
+  /// ===============================
+  /// DELETE IMAGE
+  /// ===============================
+
+  Future<void> _deleteImage() async {
+    final success = await ProfileServices.deleteProfilePicture();
+
+    if (success) {
+      setState(() {
+        _profileImage = null;
+        profileImageUrl = null;
+      });
+    }
+  }
+
+  /// ===============================
+  /// UI
+  /// ===============================
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Provider.of<LanguageProvider>(context).text;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F0FF),
@@ -112,35 +187,42 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
             color: const Color(0xFF9B7EBD),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFF9B7EBD)),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
+              /// PROFILE IMAGE
               Center(
-                child: Stack(
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.grey.shade300,
-                        border: Border.all(color: Colors.white, width: 2),
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  onLongPress: _deleteImage,
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                          image: _profileImage != null
+                              ? DecorationImage(
+                                  image: FileImage(_profileImage!),
+                                  fit: BoxFit.cover,
+                                )
+                              : profileImageUrl != null
+                                  ? DecorationImage(
+                                      image: NetworkImage(profileImageUrl!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
+                          color: Colors.grey.shade300,
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () {},
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
                         child: Container(
                           width: 32,
                           height: 32,
@@ -156,11 +238,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
+
               const SizedBox(height: 24),
+
+              /// FORM CARD
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -187,13 +272,14 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ChangeEmail(),
+                            builder: (context) => ChangeEmail(
+                              currentEmail: emailController.text,
+                            ),
                           ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: Center(
-                            widthFactor: 1,
                             child: Text(
                               t['change_gmail']!,
                               style: GoogleFonts.poppins(
@@ -223,7 +309,6 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                         child: Padding(
                           padding: const EdgeInsets.only(right: 12),
                           child: Center(
-                            widthFactor: 1,
                             child: Text(
                               t['change_password']!,
                               style: GoogleFonts.poppins(
@@ -239,7 +324,10 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ],
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              /// SAVE BUTTON
               GestureDetector(
                 onTap: saveChanges,
                 child: Container(
@@ -261,7 +349,10 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ),
                 ),
               ),
+
               const SizedBox(height: 12),
+
+              /// DELETE ACCOUNT
               GestureDetector(
                 onTap: deleteAccount,
                 child: Container(
@@ -284,35 +375,28 @@ class _AccountInfoPageState extends State<AccountInfoPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
       bottomNavigationBar: CustomBottomNavbar(
         onHomeTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => DashboardPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => DashboardPage())),
         onJournalTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => JournalPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => JournalPage())),
         onInsightTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => InsightPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => InsightPage())),
         onProfileTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ProfilePage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => ProfilePage())),
         onFabTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AddJournal()),
-        ),
+            context, MaterialPageRoute(builder: (_) => AddJournal())),
       ),
     );
   }
+
+  /// ===============================
+  /// WIDGET HELPER
+  /// ===============================
 
   Widget _label(String text) => Text(
         text,

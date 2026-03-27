@@ -158,23 +158,23 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ForgotPassword(),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ForgotPassword(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          t['forgot_password']!,
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Color(0xFFF5F0FF).withOpacity(0.8),
                           ),
-                        );
-                      },
-                      child:  Text(
-                        t['forgot_password']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Color(0xFFF5F0FF).withOpacity(0.8),
                         ),
                       ),
-                     ),
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                             );
 
                             // Close loading dialog
-                            Navigator.pop(context);   
+                            Navigator.pop(context);
 
                             if (result != null) {
                               // simpan token
@@ -230,8 +230,23 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               );
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Login gagal")),
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text("Login Gagal"),
+                                    content:
+                                        const Text("Email atau password salah"),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text("OK"),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             }
                           },

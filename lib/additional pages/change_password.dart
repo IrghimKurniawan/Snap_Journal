@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:snap_journal/auth/login.dart';
+import 'package:snap_journal/services/auth_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
 
 class ChangePassword extends StatefulWidget {
@@ -76,7 +79,68 @@ class _ChangePasswordState extends State<ChangePassword> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () async {
+                  final oldPassword = oldPasswordController.text.trim();
+                  final newPassword = newPasswordController.text.trim();
+                  final confirmPassword = confirmPasswordController.text.trim();
+
+                  if (oldPassword.isEmpty ||
+                      newPassword.isEmpty ||
+                      confirmPassword.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("All fields must be filled")),
+                    );
+                    return;
+                  }
+
+                  if (newPassword != confirmPassword) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content:
+                              Text("Password confirmation does not match")),
+                    );
+                    return;
+                  }
+
+                  try {
+                    final res = await AuthServices.changePassword(
+                      oldPassword,
+                      newPassword,
+                      confirmPassword,
+                    );
+
+                    if (res['data'] != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text("Password successfully changed")),
+                      );
+
+                      Navigator.pop(context);
+                    } else if (res['errors'] != null &&
+                        res['errors'].toString().contains("Unauthorized")) {
+                      // token sudah tidak valid → logout
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false,
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text(
+                                res['message'] ?? "Failed to change password")),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Error: $e")),
+                    );
+                  }
+                },
                 child: Text(
                   t['save_changes']!,
                   style: GoogleFonts.poppins(
@@ -94,36 +158,38 @@ class _ChangePasswordState extends State<ChangePassword> {
   }
 
   Widget _buildLabel(String text) => Text(
-    text,
-    style: GoogleFonts.poppins(
-      fontWeight: FontWeight.w600,
-      color: primaryColor,
-    ),
-  );
+        text,
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.w600,
+          color: primaryColor,
+        ),
+      );
 
   Widget _buildPasswordField({
     required TextEditingController controller,
     required bool obscure,
     required VoidCallback onToggle,
-  }) => TextField(
-    controller: controller,
-    obscureText: obscure,
-    style: GoogleFonts.poppins(),
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
-      ),
-      suffixIcon: IconButton(
-        icon: Icon(
-          obscure ? Icons.visibility_off : Icons.visibility,
-          color: primaryColor,
+  }) =>
+      TextField(
+        controller: controller,
+        obscureText: obscure,
+        style: GoogleFonts.poppins(),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(
+              obscure ? Icons.visibility_off : Icons.visibility,
+              color: primaryColor,
+            ),
+            onPressed: onToggle,
+          ),
         ),
-        onPressed: onToggle,
-      ),
-    ),
-  );
+      );
 }

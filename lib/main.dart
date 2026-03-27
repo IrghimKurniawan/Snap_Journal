@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/auth/login.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final languageProvider = LanguageProvider();
   await languageProvider.loadLanguage();
+
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => languageProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => languageProvider),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -20,10 +26,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: 'Snap Journal',
-      home: const LoginPage(),
       debugShowCheckedModeBanner: false,
+      theme: themeProvider.themeData,
+      home: const LoginPage(),
     );
   }
 }

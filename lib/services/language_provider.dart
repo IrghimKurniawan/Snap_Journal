@@ -30,7 +30,6 @@ class LanguageProvider extends ChangeNotifier {
     'nav_profile': 'Profile',
 
     // DASHBOARD
-    'good_morning': 'Good Morning',
     'how_feeling': 'How Are You Feeling ?',
     'latest_memory': 'Latest Memory',
     'daily_insight': 'Daily Insight',
@@ -183,6 +182,11 @@ class LanguageProvider extends ChangeNotifier {
     'enter_new_password': 'Enter New Password',
     'confirm_new_password': 'Confirm New Password',
     'update_password': 'Update Password',
+
+    //selamat
+    'good_morning': 'Good Morning',
+    'good_afternoon': 'Good Afternoon',
+    'good_evening': 'Good Evening'
   };
 
   // ===================== INDONESIA =====================
@@ -194,7 +198,6 @@ class LanguageProvider extends ChangeNotifier {
     'nav_profile': 'Profil',
 
     // DASHBOARD
-    'good_morning': 'Selamat Pagi',
     'how_feeling': 'Bagaimana Perasaanmu ?',
     'latest_memory': 'Kenangan Terbaru',
     'daily_insight': 'Wawasan Harian',
@@ -285,7 +288,6 @@ class LanguageProvider extends ChangeNotifier {
     'new_email': 'Email Baru',
     'new_email_hint': 'Masukkan email baru',
     'otp': 'OTP',
-    'confirm_password': 'Konfirmasi Kata Sandi',
 
     // CHANGE PASSWORD
     'change_password_title': 'Ganti Kata Sandi',
@@ -347,5 +349,9 @@ class LanguageProvider extends ChangeNotifier {
     'enter_new_password': 'Masukkan Kata Sandi Baru',
     'confirm_new_password': 'Konfirmasi Kata Sandi Baru',
     'update_password': 'Perbarui Kata Sandi',
+
+    'good_morning': 'Selamat Pagi',
+    'good_afternoon': 'Selamat Sore',
+    'good_evening': 'Selamat Siang',
   };
 }
