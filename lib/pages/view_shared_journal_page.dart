@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snap_journal/services/journal_services.dart';
-import 'package:snap_journal/services/theme_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
+import 'package:snap_journal/services/sharelink_services.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 
-class JournalDetailPage extends StatefulWidget {
-  final String journalId;
-  const JournalDetailPage({super.key, required this.journalId});
+class ViewSharedJournalPage extends StatefulWidget {
+  final String token;
+  const ViewSharedJournalPage({super.key, required this.token});
 
   @override
-  State<JournalDetailPage> createState() => _JournalDetailPageState();
+  State<ViewSharedJournalPage> createState() => _ViewSharedJournalPageState();
 }
 
-class _JournalDetailPageState extends State<JournalDetailPage> {
-  Map<String, dynamic>? _journal;
+class _ViewSharedJournalPageState extends State<ViewSharedJournalPage> {
   bool _isLoading = true;
+  Map<String, dynamic>? _journal;
+  String? _error;
+
   VideoPlayerController? _videoController;
   bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
-    _loadDetail();
+    _loadJournal();
   }
 
   @override
@@ -31,24 +33,55 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
     super.dispose();
   }
 
-  Future<void> _loadDetail() async {
-    final result = await JournalServices.getJournalById(widget.journalId);
-    if (result != null) {
-      setState(() {
-        _journal = result;
-        _isLoading = false;
-      });
-      _initVideo();
-    } else {
-      setState(() => _isLoading = false);
-    }
+  Future<void> _loadJournal() async {
+    final data = await ShareLinkServices.accessLink(widget.token);
+
+    print("ACCESS LINK RAW DATA: $data");
+
+    setState(() {
+      _isLoading = false;
+      if (data != null && data['access'] == true) {
+        // ✅ FIX: ambil dari data['journal'] karena struktur response:
+        // { access: true, journal: { ... } }
+        final journal = data['journal'];
+        if (journal != null) {
+          _journal = Map<String, dynamic>.from(journal);
+          print("JOURNAL DATA: $_journal");
+          print("MEDIA DATA: ${_journal!['media']}");
+          _initVideo();
+        } else {
+          _error = "Data jurnal tidak ditemukan.";
+        }
+      } else if (data != null && data['access'] == false) {
+        final reason = data['reason'];
+        if (reason == 'login_required') {
+          _error = "Kamu perlu login untuk mengakses jurnal ini.";
+        } else if (reason == 'pending') {
+          _error = "Permintaan aksesmu sedang menunggu persetujuan pemilik.";
+        } else if (reason == 'denied') {
+          _error = "Aksesmu ditolak oleh pemilik jurnal.";
+        } else {
+          _error = "Kamu tidak memiliki akses ke jurnal ini.";
+        }
+      } else {
+        _error =
+            "Gagal memuat jurnal.\nMungkin link sudah kadaluarsa atau dicabut.";
+      }
+    });
   }
 
   void _initVideo() {
-    final media = _journal?['media'] as List<dynamic>? ?? [];
-    final videoMedia = media.where((m) => m['type'] == 'video').toList();
-    if (videoMedia.isNotEmpty) {
-      final videoUrl = videoMedia.first['url'] as String;
+    if (_journal == null) return;
+    final media = _journal!['media'];
+    if (media == null || media is! List) return;
+
+    final videoList = media
+        .where((m) => m is Map && m['type'] == 'video')
+        .toList();
+
+    if (videoList.isNotEmpty) {
+      final videoUrl = videoList.first['url'] as String;
+      print("VIDEO URL: $videoUrl");
       _videoController = VideoPlayerController.networkUrl(Uri.parse(videoUrl))
         ..initialize().then((_) {
           setState(() {});
@@ -79,6 +112,12 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
     }
   }
 
+  List<dynamic> _getImages() {
+    final media = _journal?['media'];
+    if (media == null || media is! List) return [];
+    return media.where((m) => m is Map && m['type'] == 'image').toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final primary = context.watchPrimaryColor;
@@ -93,40 +132,45 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
           icon: Icon(Icons.arrow_back, color: primary),
           onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          if (_journal != null)
-            IconButton(
-              icon: Icon(
-                _journal!['is_favorite'] == true
-                    ? Icons.favorite
-                    : Icons.favorite_border,
-                color: _journal!['is_favorite'] == true ? Colors.red : primary,
-              ),
-              onPressed: () async {
-                final newValue = !(_journal!['is_favorite'] ?? false);
-                final success = await JournalServices.toggleFavorite(
-                    _journal!['id'], newValue);
-                if (success)
-                  setState(() {
-                    _journal!['is_favorite'] = newValue;
-                  });
-              },
-            ),
-        ],
+        title: Text(
+          _journal?['title'] ?? "Shared Journal",
+          style: GoogleFonts.poppins(
+              fontSize: 18, fontWeight: FontWeight.bold, color: primary),
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: primary))
-          : _journal == null
-              ? const Center(child: Text("Jurnal tidak ditemukan"))
+          : _error != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.link_off, color: Colors.grey, size: 48),
+                        const SizedBox(height: 16),
+                        Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.poppins(
+                              color: Colors.grey, fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // ─── TANGGAL ───
-                      Text(_formatDate(_journal!['created_at']),
-                          style: GoogleFonts.poppins(
-                              fontSize: 12, color: Colors.grey)),
+                      Text(
+                        _formatDate(_journal!['created_at']),
+                        style: GoogleFonts.poppins(
+                            fontSize: 12, color: Colors.grey),
+                      ),
                       const SizedBox(height: 8),
 
                       // ─── JUDUL ───
@@ -188,29 +232,47 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
 
                       // ─── FOTO ───
                       Builder(builder: (_) {
-                        final media =
-                            _journal!['media'] as List<dynamic>? ?? [];
-                        final images =
-                            media.where((m) => m['type'] == 'image').toList();
+                        final images = _getImages();
+                        print("IMAGES COUNT: ${images.length}");
                         if (images.isEmpty) return const SizedBox();
                         return Column(
                           children: [
                             SizedBox(
-                              height: 100,
+                              height: 120,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
                                 itemCount: images.length,
                                 itemBuilder: (context, index) {
+                                  final imageUrl =
+                                      images[index]['url'] as String?;
+                                  print("IMAGE URL $index: $imageUrl");
+                                  if (imageUrl == null) return const SizedBox();
                                   return Container(
-                                    width: 100,
-                                    height: 100,
+                                    width: 120,
+                                    height: 120,
                                     margin: const EdgeInsets.only(right: 8),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      image: DecorationImage(
-                                          image: NetworkImage(
-                                              images[index]['url']),
-                                          fit: BoxFit.cover),
+                                      color: Colors.grey.shade200,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        imageUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            const Icon(Icons.broken_image,
+                                                color: Colors.grey),
+                                        loadingBuilder:
+                                            (_, child, loadingProgress) {
+                                          if (loadingProgress == null)
+                                            return child;
+                                          return Center(
+                                              child: CircularProgressIndicator(
+                                                  color: primary,
+                                                  strokeWidth: 2));
+                                        },
+                                      ),
                                     ),
                                   );
                                 },
@@ -237,11 +299,13 @@ class _JournalDetailPageState extends State<JournalDetailPage> {
                                   offset: const Offset(0, 2))
                             ],
                           ),
-                          child: Text(_journal!['note'],
-                              style: GoogleFonts.poppins(
-                                  fontSize: 15,
-                                  color: Colors.black87,
-                                  height: 1.6)),
+                          child: Text(
+                            _journal!['note'],
+                            style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                height: 1.6),
+                          ),
                         ),
                       ],
                     ],

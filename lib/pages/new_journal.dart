@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snap_journal/services/media_services.dart';
@@ -27,65 +28,43 @@ class _AddJournalState extends State<AddJournal> {
 
   final ImagePicker _picker = ImagePicker();
 
-  // Pilih dan upload foto
   Future<void> _pickAndUploadImage() async {
     if (_uploadedImageUrls.length >= 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Maksimal 3 foto")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Maksimal 3 foto")));
       return;
     }
-
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-
+    final picked =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
     if (picked == null) return;
-
     setState(() => _isUploadingImage = true);
-
     final result = await MediaServices.uploadImageFromXFile(picked);
-
     if (result != null) {
       final bytes = await picked.readAsBytes();
       setState(() {
         _uploadedImageUrls.add(result.url);
         _selectedImageBytes.add(bytes);
       });
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Foto berhasil diupload!")),
-        );
-      }
+            const SnackBar(content: Text("Foto berhasil diupload!")));
     } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Gagal upload foto")),
-        );
-      }
+      if (mounted)
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text("Gagal upload foto")));
     }
-
     setState(() => _isUploadingImage = false);
   }
 
-  // Pilih video
   Future<void> _pickVideo() async {
     final picked = await _picker.pickVideo(
-      source: ImageSource.gallery,
-      maxDuration: const Duration(minutes: 5),
-    );
-
+        source: ImageSource.gallery, maxDuration: const Duration(minutes: 5));
     if (picked == null) return;
-
     setState(() => _selectedVideo = picked);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Video dipilih: ${picked.name}")),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Video dipilih: ${picked.name}")));
   }
 
-  // Hapus foto
   Future<void> _removeImage(int index) async {
     final url = _uploadedImageUrls[index];
     await MediaServices.deleteMedia(url);
@@ -95,31 +74,20 @@ class _AddJournalState extends State<AddJournal> {
     });
   }
 
-  // Hapus video
-  void _removeVideo() {
-    setState(() => _selectedVideo = null);
-  }
+  void _removeVideo() => setState(() => _selectedVideo = null);
 
-  // Save journal
   Future<void> _saveJournal({bool isDraft = false}) async {
     if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Judul wajib diisi!")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Judul wajib diisi!")));
       return;
     }
-
-    // Kalau publish, video wajib
     if (!isDraft && _selectedVideo == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Video wajib diisi untuk publish jurnal!")),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Video wajib diisi untuk publish jurnal!")));
       return;
     }
-
     setState(() => _isSaving = true);
-
     final success = await JournalServices.createJournal(
       title: titleController.text.trim(),
       note: noteController.text.trim(),
@@ -127,49 +95,38 @@ class _AddJournalState extends State<AddJournal> {
       videoFile: _selectedVideo,
       isDraft: isDraft,
     );
-
     setState(() => _isSaving = false);
-
     if (success) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(isDraft
                 ? "Jurnal disimpan sebagai draft!"
-                : "Jurnal berhasil dipublish!"),
-          ),
-        );
+                : "Jurnal berhasil dipublish!")));
         Navigator.pop(context);
       }
     } else {
-      if (mounted) {
+      if (mounted)
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Gagal menyimpan jurnal")),
-        );
-      }
+            const SnackBar(content: Text("Gagal menyimpan jurnal")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final primary = context.watchPrimaryColor;
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFFF5F0FF),
+        backgroundColor: context.scaffoldColor,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFF9B7EBD)),
+          icon: Icon(Icons.close, color: primary),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          t['new_journal']!,
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF9B7EBD),
-          ),
-        ),
+        title: Text(t['new_journal']!,
+            style: GoogleFonts.poppins(
+                fontSize: 20, fontWeight: FontWeight.bold, color: primary)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -184,9 +141,7 @@ class _AddJournalState extends State<AddJournal> {
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9B7EBD),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      color: primary, borderRadius: BorderRadius.circular(15)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -194,9 +149,8 @@ class _AddJournalState extends State<AddJournal> {
                         padding: const EdgeInsets.symmetric(horizontal: 8),
                         height: 28,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD9D9D9),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                            color: const Color(0xFFD9D9D9),
+                            borderRadius: BorderRadius.circular(14)),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -204,40 +158,32 @@ class _AddJournalState extends State<AddJournal> {
                                 size: 14, color: Colors.black87),
                             const SizedBox(width: 4),
                             Text(
-                              "Today, ${DateFormat('MMM d').format(DateTime.now())}",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black87,
-                              ),
-                            ),
+                                "Today, ${DateFormat('MMM d').format(DateTime.now())}",
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87)),
                           ],
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        t['title']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFFF5F0FF),
-                        ),
-                      ),
+                      Text(t['title']!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFF5F0FF))),
                       const SizedBox(height: 8),
                       Container(
                         height: 45,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F0FF),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            color: const Color(0xFFF5F0FF),
+                            borderRadius: BorderRadius.circular(10)),
                         child: TextField(
                           controller: titleController,
                           decoration: InputDecoration(
                             hintText: "${t['title']}...",
                             hintStyle: GoogleFonts.poppins(
-                              color: const Color(0xFF9B7EBD),
-                              fontSize: 14,
-                            ),
+                                color: primary, fontSize: 14),
                             border: InputBorder.none,
                             contentPadding:
                                 const EdgeInsets.symmetric(horizontal: 16),
@@ -245,29 +191,23 @@ class _AddJournalState extends State<AddJournal> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        t['note']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFFF5F0FF),
-                        ),
-                      ),
+                      Text(t['note']!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFF5F0FF))),
                       const SizedBox(height: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F0FF),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            color: const Color(0xFFF5F0FF),
+                            borderRadius: BorderRadius.circular(10)),
                         child: TextField(
                           controller: noteController,
                           maxLines: 4,
                           decoration: InputDecoration(
                             hintText: "${t['note']}...",
                             hintStyle: GoogleFonts.poppins(
-                              color: const Color(0xFF9B7EBD),
-                              fontSize: 14,
-                            ),
+                                color: primary, fontSize: 14),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.all(16),
                           ),
@@ -284,30 +224,25 @@ class _AddJournalState extends State<AddJournal> {
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9B7EBD),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      color: primary, borderRadius: BorderRadius.circular(15)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        t['add_media']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFFF5F0FF),
-                        ),
-                      ),
+                      Text(t['add_media']!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFF5F0FF))),
                       const SizedBox(height: 8),
                       GestureDetector(
                         onTap: _isUploadingImage ? null : _pickAndUploadImage,
                         child: Container(
                           height: 90,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF9B7EBD),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.white, width: 1.5),
-                          ),
+                              color: primary,
+                              borderRadius: BorderRadius.circular(20),
+                              border:
+                                  Border.all(color: Colors.white, width: 1.5)),
                           child: _isUploadingImage
                               ? const Center(
                                   child: CircularProgressIndicator(
@@ -319,18 +254,14 @@ class _AddJournalState extends State<AddJournal> {
                                         color: Colors.white, size: 28),
                                     const SizedBox(height: 8),
                                     Text(
-                                      "${t['photo']} (${_uploadedImageUrls.length}/3)",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
+                                        "${t['photo']} (${_uploadedImageUrls.length}/3)",
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500)),
                                   ],
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      // Preview foto
                       if (_selectedImageBytes.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         SizedBox(
@@ -348,10 +279,9 @@ class _AddJournalState extends State<AddJournal> {
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
                                       image: DecorationImage(
-                                        image: MemoryImage(
-                                            _selectedImageBytes[index]),
-                                        fit: BoxFit.cover,
-                                      ),
+                                          image: MemoryImage(
+                                              _selectedImageBytes[index]),
+                                          fit: BoxFit.cover),
                                     ),
                                   ),
                                   Positioned(
@@ -363,9 +293,8 @@ class _AddJournalState extends State<AddJournal> {
                                         width: 22,
                                         height: 22,
                                         decoration: const BoxDecoration(
-                                          color: Colors.red,
-                                          shape: BoxShape.circle,
-                                        ),
+                                            color: Colors.red,
+                                            shape: BoxShape.circle),
                                         child: const Icon(Icons.close,
                                             size: 14, color: Colors.white),
                                       ),
@@ -382,41 +311,33 @@ class _AddJournalState extends State<AddJournal> {
                 ),
                 const SizedBox(height: 12),
 
-                // ─── VIDEO (WAJIB UNTUK PUBLISH) ───
+                // ─── VIDEO ───
                 Container(
                   padding:
                       const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF9B7EBD),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      color: primary, borderRadius: BorderRadius.circular(15)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Text(
-                            "Video",
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xFFF5F0FF),
-                            ),
-                          ),
+                          Text("Video",
+                              style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFFF5F0FF))),
                           const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Text(
-                              "Wajib untuk Publish",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 10),
-                            ),
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: const Text("Wajib untuk Publish",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 10)),
                           ),
                         ],
                       ),
@@ -428,41 +349,36 @@ class _AddJournalState extends State<AddJournal> {
                           decoration: BoxDecoration(
                             color: _selectedVideo != null
                                 ? Colors.green.withOpacity(0.3)
-                                : const Color(0xFF9B7EBD),
+                                : primary,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: _selectedVideo != null
-                                  ? Colors.green
-                                  : Colors.white,
-                              width: 1.5,
-                            ),
+                                color: _selectedVideo != null
+                                    ? Colors.green
+                                    : Colors.white,
+                                width: 1.5),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _selectedVideo != null
-                                    ? Icons.check_circle
-                                    : Icons.videocam,
-                                color: Colors.white,
-                                size: 28,
-                              ),
+                                  _selectedVideo != null
+                                      ? Icons.check_circle
+                                      : Icons.videocam,
+                                  color: Colors.white,
+                                  size: 28),
                               const SizedBox(height: 8),
                               Text(
-                                _selectedVideo != null
-                                    ? _selectedVideo!.name
-                                    : "Pilih Video",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                                  _selectedVideo != null
+                                      ? _selectedVideo!.name
+                                      : "Pilih Video",
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                  overflow: TextOverflow.ellipsis),
                             ],
                           ),
                         ),
                       ),
-                      // Tombol hapus video
                       if (_selectedVideo != null) ...[
                         const SizedBox(height: 8),
                         GestureDetector(
@@ -473,11 +389,9 @@ class _AddJournalState extends State<AddJournal> {
                               Icon(Icons.delete_outline,
                                   color: Colors.white70, size: 16),
                               SizedBox(width: 4),
-                              Text(
-                                "Hapus Video",
-                                style: TextStyle(
-                                    color: Colors.white70, fontSize: 12),
-                              ),
+                              Text("Hapus Video",
+                                  style: TextStyle(
+                                      color: Colors.white70, fontSize: 12)),
                             ],
                           ),
                         ),
@@ -487,7 +401,7 @@ class _AddJournalState extends State<AddJournal> {
                 ),
                 const SizedBox(height: 15),
 
-                // ─── TOMBOL SAVE ───
+                // ─── TOMBOL PUBLISH ───
                 GestureDetector(
                   onTap: _isSaving ? null : () => _saveJournal(isDraft: false),
                   child: Container(
@@ -495,9 +409,8 @@ class _AddJournalState extends State<AddJournal> {
                         vertical: 20, horizontal: 20),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: _isSaving ? Colors.grey : Colors.black,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                        color: _isSaving ? Colors.grey : Colors.black,
+                        borderRadius: BorderRadius.circular(15)),
                     child: Center(
                       child: _isSaving
                           ? const CircularProgressIndicator(color: Colors.white)
@@ -507,14 +420,11 @@ class _AddJournalState extends State<AddJournal> {
                                 const Icon(Icons.publish,
                                     color: Color(0xFFF5F0FF), size: 28),
                                 const SizedBox(width: 10),
-                                Text(
-                                  t['save']!,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xFFF5F0FF),
-                                  ),
-                                ),
+                                Text(t['save']!,
+                                    style: GoogleFonts.poppins(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFFF5F0FF))),
                               ],
                             ),
                     ),
@@ -532,24 +442,19 @@ class _AddJournalState extends State<AddJournal> {
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                          color: const Color(0xFF9B7EBD), width: 1.5),
+                      border: Border.all(color: primary, width: 1.5),
                     ),
                     child: Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.drafts,
-                              color: Color(0xFF9B7EBD), size: 28),
+                          Icon(Icons.drafts, color: primary, size: 28),
                           const SizedBox(width: 10),
-                          Text(
-                            t['save_as_draft']!,
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF9B7EBD),
-                            ),
-                          ),
+                          Text(t['save_as_draft']!,
+                              style: GoogleFonts.poppins(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: primary)),
                         ],
                       ),
                     ),

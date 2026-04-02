@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 import 'package:snap_journal/models/notification_model.dart';
 import 'package:snap_journal/services/notification_services.dart';
 
@@ -44,8 +45,7 @@ class _NotificationPageState extends State<NotificationPage> {
       setState(() => _notifications.removeWhere((n) => n.id == id));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal menghapus notifikasi")),
-      );
+          const SnackBar(content: Text("Gagal menghapus notifikasi")));
     }
   }
 
@@ -57,26 +57,21 @@ class _NotificationPageState extends State<NotificationPage> {
         content: const Text("Yakin ingin menghapus semua notifikasi?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Batal"),
-          ),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("Batal")),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
-          ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text("Hapus", style: TextStyle(color: Colors.red))),
         ],
       ),
     );
-
     if (confirm != true) return;
-
     final success = await NotificationServices.clearAllNotifications();
     if (success) {
       setState(() => _notifications = []);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal menghapus semua notifikasi")),
-      );
+          const SnackBar(content: Text("Gagal menghapus semua notifikasi")));
     }
   }
 
@@ -90,6 +85,7 @@ class _NotificationPageState extends State<NotificationPage> {
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final primary = context.watchPrimaryColor;
 
     final todayNotifs =
         _notifications.where((n) => _isToday(n.createdAt)).toList();
@@ -101,7 +97,7 @@ class _NotificationPageState extends State<NotificationPage> {
         preferredSize: const Size.fromHeight(70),
         child: AppBar(
           elevation: 0,
-          backgroundColor: const Color(0xFF9B7EBD),
+          backgroundColor: primary,
           automaticallyImplyLeading: false,
           flexibleSpace: SafeArea(
             child: Padding(
@@ -118,14 +114,11 @@ class _NotificationPageState extends State<NotificationPage> {
                             const Icon(Icons.arrow_back, color: Colors.white),
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        t['notifications']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      Text(t['notifications']!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
                     ],
                   ),
                   GestureDetector(
@@ -134,17 +127,13 @@ class _NotificationPageState extends State<NotificationPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        t['clear']!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: const Color(0xFF9B7EBD),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Text(t['clear']!,
+                          style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: primary,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -153,7 +142,7 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ),
       ),
-      backgroundColor: const Color(0xFF9B7EBD),
+      backgroundColor: primary,
       body: SafeArea(
         child: _isLoading
             ? const Center(
@@ -166,11 +155,9 @@ class _NotificationPageState extends State<NotificationPage> {
                         const Icon(Icons.notifications_off,
                             color: Colors.white54, size: 60),
                         const SizedBox(height: 12),
-                        Text(
-                          "Tidak ada notifikasi",
-                          style: GoogleFonts.poppins(
-                              color: Colors.white54, fontSize: 16),
-                        ),
+                        Text("Tidak ada notifikasi",
+                            style: GoogleFonts.poppins(
+                                color: Colors.white54, fontSize: 16)),
                       ],
                     ),
                   )
@@ -183,29 +170,25 @@ class _NotificationPageState extends State<NotificationPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (todayNotifs.isNotEmpty) ...[
-                            Text(
-                              t['today']!,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400),
-                            ),
+                            Text(t['today']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400)),
                             const SizedBox(height: 10),
-                            ...todayNotifs
-                                .map((n) => _buildNotifCard(n, dimmed: false)),
+                            ...todayNotifs.map((n) => _buildNotifCard(n,
+                                dimmed: false, primary: primary)),
                             const SizedBox(height: 16),
                           ],
                           if (olderNotifs.isNotEmpty) ...[
-                            Text(
-                              t['yesterday']!,
-                              style: GoogleFonts.poppins(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400),
-                            ),
+                            Text(t['yesterday']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w400)),
                             const SizedBox(height: 10),
-                            ...olderNotifs
-                                .map((n) => _buildNotifCard(n, dimmed: true)),
+                            ...olderNotifs.map((n) => _buildNotifCard(n,
+                                dimmed: true, primary: primary)),
                           ],
                         ],
                       ),
@@ -215,7 +198,8 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  Widget _buildNotifCard(NotificationModel notif, {required bool dimmed}) {
+  Widget _buildNotifCard(NotificationModel notif,
+      {required bool dimmed, required Color primary}) {
     return Opacity(
       opacity: dimmed || notif.isRead ? 0.6 : 1.0,
       child: Dismissible(
@@ -226,9 +210,7 @@ class _NotificationPageState extends State<NotificationPage> {
           padding: const EdgeInsets.only(right: 20),
           alignment: Alignment.centerRight,
           decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(20),
-          ),
+              color: Colors.red, borderRadius: BorderRadius.circular(20)),
           child: const Icon(Icons.delete, color: Colors.white),
         ),
         onDismissed: (_) => _deleteNotification(notif.id),
@@ -243,9 +225,8 @@ class _NotificationPageState extends State<NotificationPage> {
                   ? const Color(0xFFEDEDED)
                   : const Color(0xFFF5F0FF),
               borderRadius: BorderRadius.circular(20),
-              border: notif.isRead
-                  ? null
-                  : Border.all(color: const Color(0xFF9B7EBD), width: 1.5),
+              border:
+                  notif.isRead ? null : Border.all(color: primary, width: 1.5),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,16 +235,14 @@ class _NotificationPageState extends State<NotificationPage> {
                   width: 45,
                   height: 45,
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15)),
                   child: Icon(
-                    notif.isRead
-                        ? Icons.notifications
-                        : Icons.notifications_active,
-                    color: const Color(0xFF9B7EBD),
-                    size: 24,
-                  ),
+                      notif.isRead
+                          ? Icons.notifications
+                          : Icons.notifications_active,
+                      color: primary,
+                      size: 24),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -274,16 +253,14 @@ class _NotificationPageState extends State<NotificationPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: Text(
-                              notif.title,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: notif.isRead
-                                    ? FontWeight.normal
-                                    : FontWeight.bold,
-                                color: const Color(0xFF7B5FA7),
-                              ),
-                            ),
+                            child: Text(notif.title,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: notif.isRead
+                                      ? FontWeight.normal
+                                      : FontWeight.bold,
+                                  color: primary,
+                                )),
                           ),
                           GestureDetector(
                             onTap: () => _deleteNotification(notif.id),
@@ -293,19 +270,14 @@ class _NotificationPageState extends State<NotificationPage> {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        notif.message,
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF9B7EBD)),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      Text(notif.message,
+                          style: TextStyle(fontSize: 12, color: primary),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis),
                       const SizedBox(height: 4),
-                      Text(
-                        DateFormat('HH:mm').format(notif.createdAt),
-                        style:
-                            const TextStyle(fontSize: 10, color: Colors.grey),
-                      ),
+                      Text(DateFormat('HH:mm').format(notif.createdAt),
+                          style: const TextStyle(
+                              fontSize: 10, color: Colors.grey)),
                     ],
                   ),
                 ),

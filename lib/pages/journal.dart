@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
@@ -10,6 +11,9 @@ import 'package:snap_journal/pages/insight.dart';
 import 'package:snap_journal/pages/new_journal.dart';
 import 'package:snap_journal/pages/profile.dart';
 import 'package:snap_journal/pages/journal_detail.dart';
+import 'package:snap_journal/pages/edit_journal.dart';
+// ✅ FIX: import dari additional pages karena share.dart ada di sana
+import 'package:snap_journal/additional%20pages/share.dart';
 import 'package:snap_journal/services/journal_services.dart';
 import 'package:intl/intl.dart';
 
@@ -101,13 +105,16 @@ class _JournalPageState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final primary = context.watchPrimaryColor;
+    final scaffoldBg = context.scaffoldColor;
 
     return Scaffold(
+      backgroundColor: scaffoldBg,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80),
         child: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: const Color(0xFFF3ECF8),
+          backgroundColor: scaffoldBg,
           elevation: 0,
           centerTitle: false,
           title: Text(
@@ -115,7 +122,7 @@ class _JournalPageState extends State<JournalPage> {
             style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF7B5FA7),
+              color: primary,
             ),
           ),
           actions: [
@@ -133,7 +140,7 @@ class _JournalPageState extends State<JournalPage> {
                     context,
                     MaterialPageRoute(builder: (_) => SearchPage()),
                   ),
-                  icon: const Icon(Icons.search, color: Color(0xFF9B7EBD)),
+                  icon: Icon(Icons.search, color: primary),
                 ),
               ),
             ),
@@ -178,9 +185,7 @@ class _JournalPageState extends State<JournalPage> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 15, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _showFavorites
-                              ? const Color(0xFF9B7EBD)
-                              : Colors.grey,
+                          color: _showFavorites ? primary : Colors.grey,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -201,9 +206,7 @@ class _JournalPageState extends State<JournalPage> {
 
                 // ─── JOURNAL GRID 2 KOLOM ───
                 _isLoading
-                    ? const Center(
-                        child:
-                            CircularProgressIndicator(color: Color(0xFF9B7EBD)))
+                    ? Center(child: CircularProgressIndicator(color: primary))
                     : _filteredJournals.isEmpty
                         ? Center(
                             child: Column(
@@ -230,7 +233,7 @@ class _JournalPageState extends State<JournalPage> {
                               crossAxisCount: 2,
                               crossAxisSpacing: 12,
                               mainAxisSpacing: 12,
-                              childAspectRatio: 0.85,
+                              childAspectRatio: 0.75,
                             ),
                             itemCount: _filteredJournals.length,
                             itemBuilder: (context, index) {
@@ -271,20 +274,65 @@ class _JournalPageState extends State<JournalPage> {
                                   ),
                                   child: Stack(
                                     children: [
-                                      // Tombol favorit
+                                      // ─── POPUP MENU (titik 3) ───
                                       Positioned(
                                         top: 8,
                                         left: 8,
                                         child: PopupMenuButton<String>(
                                           icon: const Icon(Icons.more_vert,
                                               color: Colors.white),
-                                          onSelected: (value) {
+                                          onSelected: (value) async {
                                             if (value == "delete") {
                                               _deleteJournal(
                                                   journal['id'].toString());
+                                            } else if (value == "edit") {
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      EditJournalPage(
+                                                          draft: journal),
+                                                ),
+                                              );
+                                              _loadJournals();
+                                            } else if (value == "share") {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => SharePage(
+                                                    preselectedJournalId:
+                                                        journal['id']
+                                                            .toString(),
+                                                    preselectedJournalTitle:
+                                                        journal['title'] ?? '',
+                                                  ),
+                                                ),
+                                              );
                                             }
                                           },
                                           itemBuilder: (context) => [
+                                            const PopupMenuItem(
+                                              value: "edit",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.edit,
+                                                      color: Colors.blue),
+                                                  SizedBox(width: 8),
+                                                  Text("Edit"),
+                                                ],
+                                              ),
+                                            ),
+                                            const PopupMenuItem(
+                                              value: "share",
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.share,
+                                                      color: Colors.green),
+                                                  SizedBox(width: 8),
+                                                  Text("Share"),
+                                                ],
+                                              ),
+                                            ),
                                             const PopupMenuItem(
                                               value: "delete",
                                               child: Row(
@@ -300,7 +348,7 @@ class _JournalPageState extends State<JournalPage> {
                                         ),
                                       ),
 
-                                      /// FAVORITE BUTTON
+                                      // ─── FAVORITE BUTTON ───
                                       Positioned(
                                         top: 8,
                                         right: 8,
@@ -317,7 +365,7 @@ class _JournalPageState extends State<JournalPage> {
                                               isFavorite
                                                   ? Icons.favorite
                                                   : Icons.favorite_border,
-                                                color: isFavorite
+                                              color: isFavorite
                                                   ? Colors.red
                                                   : Colors.white,
                                               size: 18,
@@ -325,15 +373,18 @@ class _JournalPageState extends State<JournalPage> {
                                           ),
                                         ),
                                       ),
-                                      // Info jurnal
+
+                                      // ─── INFO JURNAL ───
                                       Align(
                                         alignment: Alignment.bottomCenter,
                                         child: Container(
                                           width: double.infinity,
+                                          height: 90,
                                           padding: const EdgeInsets.all(10),
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFF9B7EBD),
-                                            borderRadius: BorderRadius.only(
+                                          decoration: BoxDecoration(
+                                            color: primary,
+                                            borderRadius:
+                                                const BorderRadius.only(
                                               bottomLeft: Radius.circular(16),
                                               bottomRight: Radius.circular(16),
                                             ),

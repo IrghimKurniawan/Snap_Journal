@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 import 'package:snap_journal/additional%20pages/search.dart';
 import 'package:snap_journal/services/journal_services.dart';
 import 'package:snap_journal/pages/edit_journal.dart';
@@ -41,29 +42,23 @@ class _DraftPageState extends State<DraftPage> {
         content: const Text("Yakin ingin menghapus draft ini?"),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Batal"),
-          ),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text("Batal")),
           TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Hapus", style: TextStyle(color: Colors.red)),
-          ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text("Hapus", style: TextStyle(color: Colors.red))),
         ],
       ),
     );
-
     if (confirm != true) return;
-
     final success = await JournalServices.deleteJournal(id);
     if (success) {
       setState(() => _drafts.removeWhere((d) => d['id'] == id));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Draft berhasil dihapus")),
-      );
+          const SnackBar(content: Text("Draft berhasil dihapus")));
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Gagal menghapus draft")),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Gagal menghapus draft")));
     }
   }
 
@@ -80,25 +75,22 @@ class _DraftPageState extends State<DraftPage> {
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final primary = context.watchPrimaryColor;
+    final scaffoldBg = context.scaffoldColor;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F0FF),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFF9B7EBD)),
+          icon: Icon(Icons.close, color: primary),
           onPressed: () => Navigator.pop(context),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        title: Text(
-          t['draft_title']!,
-          style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF9B7EBD),
-          ),
-        ),
+        title: Text(t['draft_title']!,
+            style: GoogleFonts.poppins(
+                fontSize: 22, fontWeight: FontWeight.bold, color: primary)),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16, top: 10),
@@ -106,15 +98,11 @@ class _DraftPageState extends State<DraftPage> {
               width: 40,
               height: 40,
               decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
+                  color: Colors.white, shape: BoxShape.circle),
               child: IconButton(
                 onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => SearchPage()),
-                ),
-                icon: const Icon(Icons.search, color: Color(0xFF9B7EBD)),
+                    context, MaterialPageRoute(builder: (_) => SearchPage())),
+                icon: Icon(Icons.search, color: primary),
               ),
             ),
           ),
@@ -122,8 +110,7 @@ class _DraftPageState extends State<DraftPage> {
       ),
       body: SafeArea(
         child: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF9B7EBD)))
+            ? Center(child: CircularProgressIndicator(color: primary))
             : _drafts.isEmpty
                 ? Center(
                     child: Column(
@@ -131,11 +118,9 @@ class _DraftPageState extends State<DraftPage> {
                       children: [
                         const Icon(Icons.drafts, size: 60, color: Colors.grey),
                         const SizedBox(height: 12),
-                        Text(
-                          "Tidak ada draft",
-                          style: GoogleFonts.poppins(
-                              fontSize: 16, color: Colors.grey),
-                        ),
+                        Text("Tidak ada draft",
+                            style: GoogleFonts.poppins(
+                                fontSize: 16, color: Colors.grey)),
                       ],
                     ),
                   )
@@ -163,10 +148,8 @@ class _DraftPageState extends State<DraftPage> {
                                     image: NetworkImage(imageUrl),
                                     fit: BoxFit.cover,
                                     colorFilter: ColorFilter.mode(
-                                      Colors.black.withOpacity(0.2),
-                                      BlendMode.darken,
-                                    ),
-                                  )
+                                        Colors.black.withOpacity(0.2),
+                                        BlendMode.darken))
                                 : null,
                           ),
                           child: Stack(
@@ -175,82 +158,67 @@ class _DraftPageState extends State<DraftPage> {
                                 top: 10,
                                 right: 10,
                                 child: _badgeDraft(
-                                  icon: Icons.drafts,
-                                  text: "Draft",
-                                ),
+                                    icon: Icons.drafts, text: "Draft"),
                               ),
                               Align(
                                 alignment: Alignment.bottomCenter,
                                 child: Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.all(12),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF9B7EBD),
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
-                                    ),
+                                  decoration: BoxDecoration(
+                                    color: primary,
+                                    borderRadius: const BorderRadius.only(
+                                        bottomLeft: Radius.circular(20),
+                                        bottomRight: Radius.circular(20)),
                                   ),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        _formatDate(draft['created_at']),
-                                        style: const TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                      Text(_formatDate(draft['created_at']),
+                                          style: const TextStyle(
+                                              color: Colors.white70,
+                                              fontSize: 12)),
                                       const SizedBox(height: 4),
-                                      Text(
-                                        draft['title'] ?? '',
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      Text(draft['title'] ?? '',
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold)),
                                       const SizedBox(height: 4),
                                       Row(
                                         children: [
                                           Expanded(
-                                            child: Text(
-                                              draft['note'] ?? '',
-                                              style: const TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 12,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
+                                            child: Text(draft['note'] ?? '',
+                                                style: const TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: 12),
+                                                overflow:
+                                                    TextOverflow.ellipsis),
                                           ),
                                           const SizedBox(width: 8),
-                                          // Tombol edit
                                           GestureDetector(
                                             onTap: () => Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (_) => EditJournalPage(
-                                                    draft: draft),
-                                              ),
+                                                  builder: (_) =>
+                                                      EditJournalPage(
+                                                          draft: draft)),
                                             ).then((updated) {
                                               if (updated == true)
                                                 _loadDrafts();
                                             }),
                                             child: _badgeDraft(
-                                              icon: Icons.edit,
-                                              text: "Edit",
-                                            ),
+                                                icon: Icons.edit, text: "Edit"),
                                           ),
                                           const SizedBox(width: 8),
                                           GestureDetector(
                                             onTap: () =>
                                                 _deleteDraft(draft['id']),
                                             child: _badgeDraft(
-                                              icon: Icons.delete_outline,
-                                              text: "Hapus",
-                                            ),
+                                                icon: Icons.delete_outline,
+                                                text: "Hapus"),
                                           ),
                                         ],
                                       ),
@@ -273,9 +241,7 @@ Widget _badgeDraft({required IconData icon, required String text}) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
     decoration: BoxDecoration(
-      color: Colors.black54,
-      borderRadius: BorderRadius.circular(20),
-    ),
+        color: Colors.black54, borderRadius: BorderRadius.circular(20)),
     child: Row(
       children: [
         Icon(icon, size: 14, color: Colors.white),

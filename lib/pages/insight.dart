@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:snap_journal/services/journal_services.dart';
 import 'package:snap_journal/services/language_provider.dart';
+import 'package:snap_journal/services/theme_extension.dart';
 import 'package:snap_journal/additional pages/share.dart';
 import 'package:snap_journal/package/navigationbar.dart';
 import 'package:snap_journal/pages/dashboard.dart';
@@ -14,7 +15,6 @@ import 'package:snap_journal/services/feeling_services.dart';
 
 class InsightPage extends StatefulWidget {
   const InsightPage({super.key});
-
   @override
   State<InsightPage> createState() => _InsightPageState();
 }
@@ -22,10 +22,8 @@ class InsightPage extends StatefulWidget {
 class _InsightPageState extends State<InsightPage> {
   String? _topMood;
   String? _topEmoji;
-
   Map<String, dynamic>? _periodicInsight;
   List<dynamic> _moodCalendar = [];
-
   bool _isLoading = true;
   bool _loading = true;
 
@@ -47,24 +45,17 @@ class _InsightPageState extends State<InsightPage> {
 
   Future<void> _loadTopMood() async {
     final history = await FeelingServices.getFeelingHistory();
-
     if (history.isEmpty) {
       setState(() => _isLoading = false);
       return;
     }
-
     final Map<String, int> moodCount = {};
-
     for (final item in history) {
       final mood = item['mood'] as String?;
-      if (mood != null) {
-        moodCount[mood] = (moodCount[mood] ?? 0) + 1;
-      }
+      if (mood != null) moodCount[mood] = (moodCount[mood] ?? 0) + 1;
     }
-
     final topMood =
         moodCount.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
-
     setState(() {
       _topMood = topMood;
       _topEmoji = moodEmoji[topMood];
@@ -75,7 +66,6 @@ class _InsightPageState extends State<InsightPage> {
   Future<void> _loadInsight() async {
     final periodic = await JournalServices.getPeriodicInsight();
     final calendar = await JournalServices.getMoodCalendar();
-
     setState(() {
       _periodicInsight = periodic;
       _moodCalendar = calendar;
@@ -86,39 +76,32 @@ class _InsightPageState extends State<InsightPage> {
   @override
   Widget build(BuildContext context) {
     final t = Provider.of<LanguageProvider>(context).text;
+    final primary = context.watchPrimaryColor;
+    final scaffoldBg = context.scaffoldColor;
 
     return Scaffold(
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: scaffoldBg,
         elevation: 0,
         centerTitle: false,
-        title: Text(
-          t['journal_insight']!,
-          style: GoogleFonts.poppins(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: const Color(0xFF9B7EBD),
-          ),
-        ),
+        title: Text(t['journal_insight']!,
+            style: GoogleFonts.poppins(
+                fontSize: 22, fontWeight: FontWeight.bold, color: primary)),
         actions: [
           Material(
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(50),
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SharePage()),
-              ),
+              onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => SharePage())),
               child: Container(
                 width: 45,
                 height: 45,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF9B7EBD).withOpacity(0.15),
-                ),
-                child:
-                    const Icon(Icons.share_outlined, color: Color(0xFF7B5FA7)),
+                    shape: BoxShape.circle, color: primary.withOpacity(0.15)),
+                child: Icon(Icons.share_outlined, color: primary),
               ),
             ),
           ),
@@ -132,126 +115,90 @@ class _InsightPageState extends State<InsightPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RealTimeCalendar(
-                  moods: _moodCalendar,
-                ),
-
+                RealTimeCalendar(moods: _moodCalendar),
                 const SizedBox(height: 15),
-
-                Text(
-                  t['monthly_summary']!,
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF9B7EBD),
-                  ),
-                ),
-
+                Text(t['monthly_summary']!,
+                    style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primary)),
                 const SizedBox(height: 10),
-
                 Row(
                   children: [
-                    /// TOP MOOD
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B7EBD),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            color: primary,
+                            borderRadius: BorderRadius.circular(10)),
                         child: Column(
                           children: [
-                            Text(
-                              _topMood ?? t['mood_happy']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFFF5F0FF),
-                              ),
-                            ),
+                            Text(_topMood ?? t['top_mood']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFF5F0FF))),
                             const SizedBox(height: 8),
                             _isLoading
                                 ? const CircularProgressIndicator(
                                     color: Colors.white)
                                 : _topMood == null
-                                    ? Text(
-                                        "—",
+                                    ? Text("—",
                                         style: GoogleFonts.poppins(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                          color: const Color(0xFFF5F0FF),
-                                        ),
-                                      )
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.bold,
+                                            color: const Color(0xFFF5F0FF)))
                                     : Column(
                                         children: [
-                                          Text(
-                                            _topEmoji ?? '',
-                                            style:
-                                                const TextStyle(fontSize: 30),
-                                          ),
+                                          Text(_topEmoji ?? '',
+                                              style: const TextStyle(
+                                                  fontSize: 30)),
                                           const SizedBox(height: 4),
-                                          Text(
-                                            _topMood!,
-                                            style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: const Color(0xFFF5F0FF),
-                                            ),
-                                          ),
+                                          Text(_topMood!,
+                                              style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color:
+                                                      const Color(0xFFF5F0FF))),
                                         ],
                                       ),
                           ],
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
-                    /// JOURNAL ENTRIES
                     Expanded(
                       child: Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF9B7EBD),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                            color: primary,
+                            borderRadius: BorderRadius.circular(10)),
                         child: Column(
                           children: [
-                            Text(
-                              t['journal_entries']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFFF5F0FF),
-                              ),
-                            ),
+                            Text(t['journal_entries']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFF5F0FF))),
                             const SizedBox(height: 8),
-                            Text(
-                              "${_periodicInsight?['total_entries'] ?? 0}",
-                              style: GoogleFonts.poppins(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFFF5F0FF),
-                              ),
-                            ),
+                            Text("${_periodicInsight?['total_entries'] ?? 0}",
+                                style: GoogleFonts.poppins(
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFFF5F0FF))),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 20),
-
-                /// DAILY INSIGHT
                 Container(
                   width: double.infinity,
                   height: 105,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: const Color(0xFF9B7EBD),
-                  ),
+                      borderRadius: BorderRadius.circular(20), color: primary),
                   child: Row(
                     children: [
                       Container(
@@ -259,10 +206,9 @@ class _InsightPageState extends State<InsightPage> {
                         height: 60,
                         margin: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white,
-                        ),
-                        child: const Icon(Icons.help, color: Color(0xFF7B5FA7)),
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white),
+                        child: Icon(Icons.help, color: primary),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -270,24 +216,20 @@ class _InsightPageState extends State<InsightPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _periodicInsight?['title'] ?? t['daily_insight']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                                _periodicInsight?['title'] ??
+                                    t['daily_insight']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white)),
                             const SizedBox(height: 4),
                             Text(
-                              _periodicInsight?['content'] ??
-                                  t['daily_insight_body']!,
-                              style: GoogleFonts.poppins(
-                                fontSize: 12,
-                                color: Colors.white70,
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                                _periodicInsight?['content'] ??
+                                    t['daily_insight_body']!,
+                                style: GoogleFonts.poppins(
+                                    fontSize: 12, color: Colors.white70),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis),
                           ],
                         ),
                       ),
@@ -301,25 +243,15 @@ class _InsightPageState extends State<InsightPage> {
       ),
       bottomNavigationBar: CustomBottomNavbar(
         onHomeTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => DashboardPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => DashboardPage())),
         onJournalTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => JournalPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => JournalPage())),
         onInsightTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => InsightPage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => InsightPage())),
         onProfileTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => ProfilePage()),
-        ),
+            context, MaterialPageRoute(builder: (_) => ProfilePage())),
         onFabTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AddJournal()),
-        ),
+            context, MaterialPageRoute(builder: (_) => AddJournal())),
       ),
     );
   }
